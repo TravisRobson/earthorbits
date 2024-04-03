@@ -1,0 +1,18 @@
+Checks: "*,
+         -abseil-*,
+         -altera-*,
+         -android-*,
+         -boost-*,
+         -darwin-*,
+         -fuchsia-*,
+         -google-*,
+         -llvm-*,
+         -llvmlibc-*,
+         -zircon-*,
+         -modernize-use-trailing-return-type,
+"
+WarningsAsErrors: ''
+HeaderFileExtensions: ['', 'h']
+ImplementationFileExtensions: ['cpp']
+HeaderFilterRegex: ''
+UseColor: true
