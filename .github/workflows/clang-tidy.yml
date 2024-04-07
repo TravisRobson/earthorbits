@@ -17,6 +17,8 @@ jobs:
             cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DEOB_ENABLE_CLANG_TIDY=ON
             -DCMAKE_C_COMPILER=clang-15 -DCMAKE_CXX_COMPILER=clang++-15
+        - name: build
+          run: cmake --build build
         # - name: configure and build
         #   uses: threeal/cmake-action@main
         #   with:
