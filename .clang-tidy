@@ -14,6 +14,5 @@ Checks: "*,
 "
 WarningsAsErrors: ''
 HeaderFileExtensions: ['', 'h']
-ImplementationFileExtensions: ['cpp']
 HeaderFilterRegex: ''
 UseColor: true

@@ -10,6 +10,7 @@ target_compile_options(tests PUBLIC
     # -Wno-global-constructors
     # -Wno-c++98-compat-pedantic
 )
+target_compile_features(tests PRIVATE cxx_std_20)
 target_include_directories(tests
     PUBLIC
         $<INSTALL_INTERFACE:include>
