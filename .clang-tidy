@@ -10,6 +10,7 @@ Checks: "*,
          -llvmlibc-*,
          -zircon-*,
          -modernize-use-trailing-return-type,
+         -readability-identifier-length,
 "
 WarningsAsErrors: ''
 HeaderFileExtensions: ['', 'h']

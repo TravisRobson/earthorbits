@@ -1,2 +1,5 @@
 # CMake temporary directories
 build
+
+# IDE folders
+.vscode

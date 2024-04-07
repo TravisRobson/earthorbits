@@ -8,6 +8,7 @@
 - [ ] `-Werror` should be optionally used, perhaps during CI only as to not hinder the programmer.
 - [ ] CMake formatting https://github.com/cheshirekow/cmake_format
 - [ ] Get valgrind running in a docker container
+- [ ] test installation command with CMake
 
 ## Style
 
