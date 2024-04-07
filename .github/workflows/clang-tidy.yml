@@ -13,14 +13,16 @@ jobs:
         - name: checkout
           uses: actions/checkout@v3
         - name: install clang-16
+          # https://askubuntu.com/q/1473403
           run: |
             wget https://apt.llvm.org/llvm.sh
+            chmod +x llvm.sh
             ./llvm.sh 16
         - name: configure
           run: >-
             cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DEOB_ENABLE_CLANG_TIDY=ON
-            -DCMAKE_C_COMPILER=clang-15 -DCMAKE_CXX_COMPILER=clang++-15
+            -DCMAKE_C_COMPILER=clang-16 -DCMAKE_CXX_COMPILER=clang++-16
         - name: build
           run: cmake --build build
     clang-tidy-macos:
@@ -28,8 +30,8 @@ jobs:
         steps:
         - name: checkout
           uses: actions/checkout@v3
-        - name: setup homebrew
-          uses: Homebrew/actions/setup-homebrew@v2s
+        # - name: setup homebrew
+        #   uses: Homebrew/actions/setup-homebrew@v2s
         - name: install clang-16
           run: brew install llvm@16
         - name: verify clang-16 installation
