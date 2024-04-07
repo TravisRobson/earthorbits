@@ -6,12 +6,16 @@ on:
       branches: [main]
 
 jobs:
-    clang-tidy:
+    clang-tidy-ubuntu:
         # https://packages.ubuntu.com/jammy/devel/ supports up to clang-15
         runs-on: ubuntu-22.04
         steps:
         - name: checkout
           uses: actions/checkout@v3
+        - name: install clang-16
+          run: |
+            wget https://apt.llvm.org/llvm.sh
+            ./llvm.sh 16
         - name: configure
           run: >-
             cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
@@ -19,10 +23,21 @@ jobs:
             -DCMAKE_C_COMPILER=clang-15 -DCMAKE_CXX_COMPILER=clang++-15
         - name: build
           run: cmake --build build
-        # - name: configure and build
-        #   uses: threeal/cmake-action@main
-        #   with:
-        #     options: "EOB_ENABLE_CLANG_TIDY=ON", "CMAKE_BUILD_TYPE=Release"]
-        #     generator: Unix Makefiles
-        #     c-compiler: clang-15
-        #     cxx-compiler: clang++-15
+    clang-tidy-macos:
+        runs-on: macos-14
+        steps:
+        - name: checkout
+          uses: actions/checkout@v3
+        - name: setup homebrew
+          uses: Homebrew/actions/setup-homebrew@v2s
+        - name: install clang-16
+          run: brew install llvm@16
+        - name: verify clang-16 installation
+          run: llvm-config --version
+        - name: configure
+          run: >-
+            cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DEOB_ENABLE_CLANG_TIDY=ON
+            -DCMAKE_C_COMPILER=clang-16 -DCMAKE_CXX_COMPILER=clang++-16
+        - name: build
+          run: cmake --build build
