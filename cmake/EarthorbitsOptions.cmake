@@ -1,4 +1,4 @@
-if (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang" )
     message(STATUS "::EARTHORBITS:: Configuring 'AppleClang' compiler options")
     set_property(GLOBAL PROPERTY EARTHORBITS_PRIVATE_COMPILE_OPTIONS
         # -Werror 
