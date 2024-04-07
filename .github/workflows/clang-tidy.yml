@@ -12,10 +12,14 @@ jobs:
         steps:
         - name: checkout
           uses: actions/checkout@v3
-        - name: configure and build
-          uses: threeal/cmake-action@main
-          with:
-            options: "EOB_ENABLE_CLANG_TIDY=ON"
-            generator: Unix Makefiles
-            c-compiler: clang-15
-            cxx-compiler: clang++-15
+        - name: configure
+          run: |
+            cmake -S . -build build -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DEOB_ENABLE_CLANG_TIDY=ON
+        # - name: configure and build
+        #   uses: threeal/cmake-action@main
+        #   with:
+        #     options: "EOB_ENABLE_CLANG_TIDY=ON", "CMAKE_BUILD_TYPE=Release"]
+        #     generator: Unix Makefiles
+        #     c-compiler: clang-15
+        #     cxx-compiler: clang++-15
