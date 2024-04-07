@@ -35,7 +35,7 @@ jobs:
         - name: install clang-16
           run: brew install llvm@16
         - name: verify clang-16 installation
-          run: llvm-config --version
+          run: sudo llvm-config --version
         - name: configure
           run: >-
             cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
