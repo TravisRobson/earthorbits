@@ -19,7 +19,7 @@ target_include_directories(tests
 
 # Prevent clang-tidy from checking fmt headers
 # https://davy.ai/ignore-3rd-party-headers-from-clang-tidy-in-cmake/
-target_include_directories(earthorbits SYSTEM PUBLIC ${CMAKE_BINARY_DIR}/_deps/googletest-src/googletest/include)
+target_include_directories(tests SYSTEM PUBLIC ${CMAKE_BINARY_DIR}/_deps/googletest-src/googletest/include)
 
 if (EOB_ENABLE_CLANG_TIDY)
     # https://cmake.org/pipermail/cmake/2018-December/068739.html
