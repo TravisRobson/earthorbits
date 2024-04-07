@@ -12,17 +12,17 @@ jobs:
         steps:
         - name: checkout
           uses: actions/checkout@v3
-        - name: install clang-16
+        - name: install clang-17
           # https://askubuntu.com/q/1473403
           run: |
             wget https://apt.llvm.org/llvm.sh
             chmod +x llvm.sh
-            sudo ./llvm.sh 16
+            sudo ./llvm.sh 17
         - name: configure
           run: >-
             cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DEOB_ENABLE_CLANG_TIDY=ON
-            -DCMAKE_C_COMPILER=clang-16 -DCMAKE_CXX_COMPILER=clang++-16
+            -DCMAKE_C_COMPILER=clang-17 -DCMAKE_CXX_COMPILER=clang++-17
         - name: build
           run: cmake --build build
     clang-tidy-macos:
@@ -30,18 +30,16 @@ jobs:
         steps:
         - name: checkout
           uses: actions/checkout@v3
-        # - name: setup homebrew
-        #   uses: Homebrew/actions/setup-homebrew@v2s
         - name: install clang-16
+          # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-of-adding-a-system-path
           run: |
             brew install llvm@16
-            ls /opt/homebrew/opt/llvm@16/bin
             echo "$(brew --prefix llvm@16)/bin" >> $GITHUB_PATH
             echo "$PATH"
-            echo "$(brew --prefix llvm@16)"
-            ls $(brew --prefix llvm@16)
         - name: verify clang-16 installation
-          run: llvm-config --version
+          run: |
+            llvm-config --version
+            clang++ --version
         - name: configure
           run: >-
             cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
