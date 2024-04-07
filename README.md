@@ -14,6 +14,8 @@
 - [ ] Compile for AppleClang, Clang, gcc 
 - [ ] Setup Github pages for this repo
 - [ ] Warnings to errors in CI
+- [ ] Optionally disable building and installing tests
+- [ ] Create a very lightweight docker image
 
 ## Style
 

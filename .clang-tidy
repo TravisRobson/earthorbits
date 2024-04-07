@@ -13,6 +13,5 @@ Checks: "*,
          -readability-identifier-length,
 "
 WarningsAsErrors: true
-HeaderFileExtensions: ['', 'h']
 HeaderFilterRegex: ''
 UseColor: true

@@ -14,23 +14,30 @@ jobs:
           uses: actions/checkout@v3
         - name: install clang-17
           # https://askubuntu.com/q/1473403
+          # https://askubuntu.com/a/26518
+          # https://azrael.digipen.edu/~mmead/www/mg/update-compilers/index.html
           run: |
             wget https://apt.llvm.org/llvm.sh
             chmod +x llvm.sh
             sudo ./llvm.sh 17
             sudo apt-get -y install clang-tidy-17
-            update-alternatives --list clang
+
+            sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-17 10
+            sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-17 10
+            sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-17 10
+
+            sudo update-alternatives --config clang
+            sudo update-alternatives --config clang++
+            sudo update-alternatives --config clang-tidy
         - name: verify clang-17 installation
           run: |
-            # llvm-config --version
+            which clang
+            which clang++
+            which clang-tidy
+            clang --version
             clang++ --version
             clang-tidy --version
-            which clang++-17
-            which clang-tidy
-            ls /usr/bin/
-            clang-tidy --dump-config
-            # which llvm-config
-            # llvm-config --prefix
+            ls /usr/bin/clang-*
         - name: configure
           run: >-
             cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
