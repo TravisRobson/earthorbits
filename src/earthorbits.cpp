@@ -12,10 +12,12 @@
 
 namespace eob {
 std::ostream &operator<<(std::ostream &os, const Tle &tle) {
-  return os << fmt::format(
-             R"({{line_number={}, satellite_number={}, classification={}}})",
-             tle.line_1.line_number, tle.line_1.satellite_number,
-             tle.line_1.classification);
+  os << fmt::format(
+      R"({{line_number={}, satellite_number={}, classification={}, launch_year={}}})",
+      tle.line_1.line_number, tle.line_1.satellite_number,
+      tle.line_1.classification, tle.line_1.launch_year);
+  os << ", ";
+  return os << fmt::format(R"({{line_number={}}})", tle.line_2.line_number);
 }
 
 constexpr int tle_line_size = 69;
@@ -85,6 +87,12 @@ Tle ParseTle(std::string &str) {
     tle.line_1.classification = line_1.substr(pos, cl_size)[0];
     pos += cl_size;
 
+    ++pos;  //  a space
+
+    constexpr size_t ly_size = 2;
+    tle.line_1.launch_year = std::stoi(line_1.substr(pos, ly_size));
+    pos += ly_size;
+
   } catch (const std::out_of_range &e) {
     //  "if the converted value would fall out of the range of
     //   the result type or if the underlying function"
@@ -98,6 +106,16 @@ Tle ParseTle(std::string &str) {
     auto msg =
         fmt::format(R"({}:{} failed to convert TLE field string, tle_str="{}")",
                     loc.file_name(), loc.function_name(), str);
+    throw EobError(msg);
+  }
+
+  // only unclassified TLEs are in the public domain (that's all we have)
+  // access to, so any other character is assumed to be an error
+  if (tle.line_1.classification != 'U') {
+    auto loc = std::source_location::current();
+    auto msg = fmt::format(
+        R"({}:{} invalid classification, expected='U', value='{}', tle_str="{}")",
+        loc.file_name(), loc.function_name(), tle.line_1.classification, str);
     throw EobError(msg);
   }
 

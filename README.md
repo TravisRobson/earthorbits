@@ -9,6 +9,9 @@
 - [ ] CMake formatting https://github.com/cheshirekow/cmake_format
 - [ ] Get valgrind running in a docker container
 - [ ] test installation command with CMake
+- [ ] Add pre-commit autoupdate check somehow
+- [ ] Create docker images
+- [ ] Compile for AppleClang, Clang, gcc 
 
 ## Style
 
@@ -28,4 +31,6 @@
 ## References
 * https://google.github.io/styleguide/cppguide.html
 * https://github.com/cpp-best-practices/gui_starter_template/blob/main/.clang-tidy 
-* 
+* https://futuretechforge.com/clang-format-tutorial/
+* https://developers.redhat.com/articles/2022/02/25/enforce-code-consistency-clang-format#conclusion
+* https://pre-commit.com

@@ -37,7 +37,9 @@ struct TleLine1 {
 };
 
 /// @see https://celestrak.org/columns/v04n03/
-struct TleLine2 {};
+struct TleLine2 {
+  int line_number;
+};
 
 /// @brief Two-line element
 ///
