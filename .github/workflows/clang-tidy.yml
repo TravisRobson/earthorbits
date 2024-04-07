@@ -1,0 +1,20 @@
+name: clang-tidy
+
+on:
+    pull_request:
+    push:
+      branches: [main]
+
+jobs:
+    clang-tidy:
+        runs-on: ubuntu-latest
+        steps:
+        - name: checkout
+          uses: actions/checkout@v3
+        - name: configure and build
+          uses: threeal/cmake-action@main
+          with:
+            args: "EOB_ENABLE_CLANG_TIDY=ON"
+            generator: Unix Makefiles
+            c-compiler: clang
+            cxx-compiler: clang++

@@ -32,8 +32,10 @@ target_compile_features(earthorbits PRIVATE cxx_std_20)
 include(AddFmt)
 target_link_libraries(earthorbits PRIVATE fmt::fmt)
 
-# https://cmake.org/pipermail/cmake/2018-December/068739.html
-set_target_properties(earthorbits
-  PROPERTIES
-    CXX_CLANG_TIDY ${CLANG_TIDY}
-)
+if (EOB_ENABLE_CLANG_TIDY)
+    # https://cmake.org/pipermail/cmake/2018-December/068739.html
+    set_target_properties(earthorbits
+        PROPERTIES
+            CXX_CLANG_TIDY ${CLANG_TIDY}
+    )
+endif()

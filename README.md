@@ -12,6 +12,7 @@
 - [ ] Add pre-commit autoupdate check somehow
 - [ ] Create docker images
 - [ ] Compile for AppleClang, Clang, gcc 
+- [ ] Setup Github pages for this repo
 
 ## Style
 

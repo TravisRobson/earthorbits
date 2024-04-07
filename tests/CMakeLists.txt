@@ -16,5 +16,13 @@ target_include_directories(tests
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
 )
 
+if (EOB_ENABLE_CLANG_TIDY)
+    # https://cmake.org/pipermail/cmake/2018-December/068739.html
+    set_target_properties(tests
+        PROPERTIES
+            CXX_CLANG_TIDY ${CLANG_TIDY}
+    )
+endif()
+
 include(GoogleTest)
 gtest_discover_tests(tests)

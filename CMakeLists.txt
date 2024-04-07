@@ -2,7 +2,13 @@ cmake_minimum_required(VERSION 3.25)
 
 project(earthorbits VERSION 0.1.0 LANGUAGES CXX)
 
-find_program(CLANG_TIDY clang-tidy)
+option(EOB_ENABLE_CLANG_TIDY "Enable clang-tidy checks when compiling" OFF)
+
+message(STATUS "::EARTHORBITS:: EOB_ENABLE_CLANG_TIDY=${EOB_ENABLE_CLANG_TIDY}")
+
+if (EOB_ENABLE_CLANG_TIDY)
+    find_program(CLANG_TIDY clang-tidy)
+endif()
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(FetchContent)
