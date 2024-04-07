@@ -1,21 +1,21 @@
 #pragma once
 
+#include <fmt/ostream.h>
+
 #include <iostream>
 #include <stdexcept>
 
-#include <fmt/ostream.h>
-
 namespace eob {
 class EobError : public std::runtime_error {
-public:
-  EobError(const std::string &s) : std::runtime_error(s) { }
+ public:
+  EobError(const std::string &s) : std::runtime_error(s) {}
 };
 
 /// TODO how am I using this exception differently to warrant
 /// it's existence?
 class InvalidPrecondition : public std::runtime_error {
-public:
-  InvalidPrecondition(const std::string &s) : std::runtime_error(s) { }
+ public:
+  InvalidPrecondition(const std::string &s) : std::runtime_error(s) {}
 };
 
 /// @see https://celestrak.org/columns/v04n03/
@@ -28,18 +28,16 @@ struct TleLine1 {
   std::string launch_piece;
   int epoch_year;
   double epoch_day;
-  double mean_motion_dot; ///< time derivative of mean motion
-  double mean_motion_ddot; ///< double time derivative of mean motion
-  double bstar_drag; 
+  double mean_motion_dot;   ///< time derivative of mean motion
+  double mean_motion_ddot;  ///< double time derivative of mean motion
+  double bstar_drag;
   int ephemeris_type;
   int element_number;
   int checksum;
 };
 
 /// @see https://celestrak.org/columns/v04n03/
-struct TleLine2 {
-
-};
+struct TleLine2 {};
 
 /// @brief Two-line element
 ///
@@ -50,7 +48,7 @@ struct Tle {
   TleLine2 line_2;
 };
 
-std::ostream& operator<<(std::ostream& os, const Tle &tle);
+std::ostream &operator<<(std::ostream &os, const Tle &tle);
 
 /// @brief Convert string TLE to EOB struct
 ///
@@ -68,5 +66,5 @@ std::ostream& operator<<(std::ostream& os, const Tle &tle);
 Tle ParseTle(std::string &str);
 }  // namespace eob
 
-template <> struct fmt::formatter<eob::Tle> : ostream_formatter {};
-
+template <>
+struct fmt::formatter<eob::Tle> : ostream_formatter {};
