@@ -24,6 +24,8 @@ jobs:
             clang++ --version
             clang-tidy --version
             which clang++-17
+            which clang-tidy
+            ls /usr/bin/
             # which llvm-config
             # llvm-config --prefix
         - name: configure
