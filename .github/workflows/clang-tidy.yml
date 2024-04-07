@@ -1,0 +1,68 @@
+name: clang-tidy
+
+on:
+    pull_request:
+    push:
+      branches: [main]
+
+jobs:
+    clang-tidy-ubuntu:
+        # https://packages.ubuntu.com/jammy/devel/ supports up to clang-15
+        runs-on: ubuntu-22.04
+        steps:
+        - name: checkout
+          uses: actions/checkout@v3
+        - name: install clang-17
+          # https://askubuntu.com/q/1473403
+          # https://askubuntu.com/a/26518
+          # https://azrael.digipen.edu/~mmead/www/mg/update-compilers/index.html
+          run: |
+            wget https://apt.llvm.org/llvm.sh
+            chmod +x llvm.sh
+            sudo ./llvm.sh 17
+            sudo apt-get -y install clang-tidy-17
+
+            sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-17 10
+            sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-17 10
+            sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-17 10
+
+            sudo update-alternatives --set clang /usr/bin/clang-17
+            sudo update-alternatives --set clang++ /usr/bin/clang++-17
+            sudo update-alternatives --set clang-tidy /usr/bin/clang-tidy-17
+        - name: verify clang-17 installation
+          run: |
+            which clang
+            which clang++
+            which clang-tidy
+            clang --version
+            clang++ --version
+            clang-tidy --version
+            ls /usr/bin/clang-*
+        - name: configure
+          run: >-
+            cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DEOB_ENABLE_CLANG_TIDY=ON
+            -DCMAKE_C_COMPILER=clang-17 -DCMAKE_CXX_COMPILER=clang++-17
+        - name: build
+          run: cmake --build build
+    clang-tidy-macos:
+        runs-on: macos-14
+        steps:
+        - name: checkout
+          uses: actions/checkout@v3
+        - name: install clang-17
+          # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-of-adding-a-system-path
+          run: |
+            brew install llvm@17
+            echo "$(brew --prefix llvm@17)/bin" >> $GITHUB_PATH
+            echo "$PATH"
+        - name: verify clang-17 installation
+          run: |
+            llvm-config --version
+            clang++ --version
+        - name: configure
+          run: >-
+            cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DEOB_ENABLE_CLANG_TIDY=ON
+        - name: build
+          run: cmake --build build

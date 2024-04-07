@@ -1,0 +1,17 @@
+Checks: "*,
+         -abseil-*,
+         -altera-*,
+         -android-*,
+         -boost-*,
+         -darwin-*,
+         -fuchsia-*,
+         -google-*,
+         -llvm-*,
+         -llvmlibc-*,
+         -zircon-*,
+         -modernize-use-trailing-return-type,
+         -readability-identifier-length,
+"
+WarningsAsErrors: true
+HeaderFilterRegex: ''
+UseColor: true
