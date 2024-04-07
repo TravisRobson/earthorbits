@@ -18,7 +18,7 @@ jobs:
             wget https://apt.llvm.org/llvm.sh
             chmod +x llvm.sh
             sudo ./llvm.sh 17
-            apt-get -y install clang-tidy-17
+            sudo apt-get -y install clang-tidy-17
         - name: verify clang-17 installation
           run: |
             # llvm-config --version
