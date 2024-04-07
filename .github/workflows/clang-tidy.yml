@@ -23,6 +23,8 @@ jobs:
             # llvm-config --version
             clang++ --version
             clang-tidy --version
+            which llvm-config
+            llvm-config --prefix
         - name: configure
           run: >-
             cmake -S . -B build -DCMAKE_BUILD_TYPE=Release

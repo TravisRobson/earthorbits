@@ -13,6 +13,7 @@
 - [ ] Create docker images
 - [ ] Compile for AppleClang, Clang, gcc 
 - [ ] Setup Github pages for this repo
+- [ ] Warnings to errors in CI
 
 ## Style
 
