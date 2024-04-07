@@ -36,6 +36,9 @@ jobs:
           run: |
             brew install llvm@16
             echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
+            echo "$GITHUB_PATH"
+            echo "$(brew --prefix llvm)"
+            ls $(brew --prefix llvm)
         - name: verify clang-16 installation
           run: llvm-config --version
         - name: configure
