@@ -26,9 +26,9 @@ jobs:
             sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-17 10
             sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-17 10
 
-            sudo update-alternatives --set /usr/bin/clang-17
-            sudo update-alternatives --set /usr/bin/clang++-17
-            sudo update-alternatives --set /usr/bin/clang-tidy-17
+            sudo update-alternatives --set clang /usr/bin/clang-17
+            sudo update-alternatives --set clang++ /usr/bin/clang++-17
+            sudo update-alternatives --set clang-tidy /usr/bin/clang-tidy-17
         - name: verify clang-17 installation
           run: |
             which clang
