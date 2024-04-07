@@ -12,7 +12,7 @@ Checks: "*,
          -modernize-use-trailing-return-type,
          -readability-identifier-length,
 "
-WarningsAsErrors: ''
+WarningsAsErrors: true
 HeaderFileExtensions: ['', 'h']
 HeaderFilterRegex: ''
 UseColor: true
