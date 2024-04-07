@@ -7,7 +7,8 @@ on:
 
 jobs:
     clang-tidy:
-        runs-on: ubuntu-latest
+        # https://packages.ubuntu.com/jammy/devel/ supports up to clang-15
+        runs-on: ubuntu-22.04
         steps:
         - name: checkout
           uses: actions/checkout@v3
@@ -16,5 +17,5 @@ jobs:
           with:
             options: "EOB_ENABLE_CLANG_TIDY=ON"
             generator: Unix Makefiles
-            c-compiler: clang
-            cxx-compiler: clang++
+            c-compiler: clang-15
+            cxx-compiler: clang++-15
