@@ -1,6 +1,7 @@
 #include "earthorbits/earthorbits.h"
 
 #include <fmt/core.h>
+#include <fmt/ostream.h>
 
 #include <cassert>
 #include <cstddef>
@@ -9,6 +10,9 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+
+template <>
+struct fmt::formatter<eob::Tle> : ostream_formatter {};
 
 namespace eob {
 std::ostream &operator<<(std::ostream &os, const Tle &tle) {

@@ -1,7 +1,6 @@
 
 add_library(earthorbits earthorbits.cpp)
 
-
 # To build the target we need headers from both locations.
 # Public headers live in include. Users of this library only need to
 # know about the headers in the include/ folder. At build time however
@@ -19,15 +18,13 @@ target_include_directories(earthorbits
 # Prevent clang-tidy from checking fmt headers
 # https://davy.ai/ignore-3rd-party-headers-from-clang-tidy-in-cmake/
 target_include_directories(earthorbits SYSTEM PUBLIC ${CMAKE_BINARY_DIR}/_deps/fmt-src/include/)
-
-get_property(earthorbit_private_compile_options GLOBAL PROPERTY 
-    EARTHORBIT_PRIVATE_COMPILE_OPTIONS)
  
 # https://github.com/cpp-best-practices/cppbestpractices/blob/master/02-Use_the_Tools_Available.md#compilers
 target_compile_options(earthorbits 
     PRIVATE 
-        ${earthorbit_private_compile_options}
+        ${EARTHORBITS_PRIVATE_COMPILE_OPTIONS}
 )
+
 target_compile_features(earthorbits PRIVATE cxx_std_20)
 include(AddFmt)
 target_link_libraries(earthorbits PRIVATE fmt::fmt)

@@ -1,17 +1,12 @@
 include(AddGoogleTest)
 
-get_property(earthorbit_private_compile_options GLOBAL PROPERTY 
-    EARTHORBIT_PRIVATE_COMPILE_OPTIONS)
-
-add_executable(tests main.cpp)
-target_link_libraries(tests PUBLIC GTest::gtest_main earthorbits)
-target_compile_options(tests PUBLIC 
-    ${orbit_private_compile_options}
-    # -Wno-global-constructors
-    # -Wno-c++98-compat-pedantic
+add_executable(earthorbittests main.cpp)
+target_link_libraries(earthorbittests PUBLIC GTest::gtest_main earthorbits)
+target_compile_options(earthorbittests PUBLIC 
+    ${EARTHORBIT_PRIVATE_COMPILE_OPTIONS}
 )
-target_compile_features(tests PRIVATE cxx_std_20)
-target_include_directories(tests
+target_compile_features(earthorbittests PRIVATE cxx_std_20)
+target_include_directories(earthorbittests
     PUBLIC
         $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
@@ -19,11 +14,11 @@ target_include_directories(tests
 
 if (EOB_ENABLE_CLANG_TIDY)
     # https://cmake.org/pipermail/cmake/2018-December/068739.html
-    set_target_properties(tests
+    set_target_properties(earthorbittests
         PROPERTIES
             CXX_CLANG_TIDY ${CLANG_TIDY}
     )
 endif()
 
 include(GoogleTest)
-gtest_discover_tests(tests)
+gtest_discover_tests(earthorbittests)
