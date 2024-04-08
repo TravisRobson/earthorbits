@@ -18,7 +18,7 @@ jobs:
           with:
             std: c++20
             enable: all
-            other_options: |
+            other_options: >+
                 --check-level=exhaustive
                 --suppress=missingIncludeSystem
                 -I include/
