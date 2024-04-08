@@ -5,7 +5,10 @@ on:
     push:
       branches: [main]
 
-
+permissions:
+    checks: write
+    pull-requests: write
+    
 # https://github.com/marketplace/actions/cppcheck-action
 # ^ is maybe an alternative worth exploring, but seems like 
 # an older cppcheck version...
