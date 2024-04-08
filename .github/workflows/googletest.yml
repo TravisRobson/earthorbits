@@ -28,4 +28,4 @@ jobs:
         - name: build
           run: cmake --build build
         - name: googletest
-          run: ./build/tests/earthorbittests
+          run: ./build/tests/earthorbittests --gtest_color=yes --gtest_output=xml
