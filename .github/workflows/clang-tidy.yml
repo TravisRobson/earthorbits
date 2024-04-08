@@ -6,7 +6,7 @@ on:
       branches: [main]
 
 jobs:
-    clang-tidy-ubuntu:
+    ubuntu:
         # https://packages.ubuntu.com/jammy/devel/ supports up to clang-15
         runs-on: ubuntu-22.04
         steps:
@@ -45,7 +45,7 @@ jobs:
             -DCMAKE_C_COMPILER=clang-17 -DCMAKE_CXX_COMPILER=clang++-17
         - name: build
           run: cmake --build build
-    clang-tidy-macos:
+    macos:
         runs-on: macos-14
         steps:
         - name: checkout
