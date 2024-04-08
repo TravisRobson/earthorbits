@@ -5,28 +5,43 @@ on:
     push:
       branches: [main]
 
+permissions:
+    checks: write
+    pull-requests: write
+
 jobs:
     macos:
         runs-on: macos-14
         steps:
         - name: checkout
           uses: actions/checkout@v3
+
         - name: install clang-17
           # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-of-adding-a-system-path
           run: |
             brew install llvm@17
             echo "$(brew --prefix llvm@17)/bin" >> $GITHUB_PATH
             echo "$PATH"
+
         - name: verify clang-17 installation
           run: |
             llvm-config --version
             clang++ --version
+
         - name: configure
           run: >-
             cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DEOB_ENABLE_CLANG_TIDY=ON
+
         - name: build
           run: cmake --build build
-        - name: googletest
-          run: ./build/tests/earthorbittests
 
+        - name: googletest
+          run: ./build/tests/earthorbittests --gtest_color=yes --gtest_output=xml
+
+
+        - name: Publish Test Results
+          uses: EnricoMi/publish-unit-test-result-action/macos@v2
+          if: always()
+          with:
+            files: test_detail.xml

@@ -6,14 +6,14 @@
 namespace eob {
 class EobError : public std::runtime_error {
  public:
-  EobError(const std::string &s) : std::runtime_error(s) {}
+  explicit EobError(const std::string &s) : std::runtime_error(s) {}
 };
 
 /// TODO how am I using this exception differently to warrant
 /// it's existence?
 class InvalidPrecondition : public std::runtime_error {
  public:
-  InvalidPrecondition(const std::string &s) : std::runtime_error(s) {}
+  explicit InvalidPrecondition(const std::string &s) : std::runtime_error(s) {}
 };
 
 /// @see https://celestrak.org/columns/v04n03/
