@@ -1,7 +1,5 @@
 #pragma once
 
-#include <fmt/ostream.h>
-
 #include <iostream>
 #include <stdexcept>
 
@@ -67,6 +65,3 @@ std::ostream &operator<<(std::ostream &os, const Tle &tle);
 /// @post return valid (filled out) Tle instance
 Tle ParseTle(std::string &str);
 }  // namespace eob
-
-template <>
-struct fmt::formatter<eob::Tle> : ostream_formatter {};
