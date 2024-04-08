@@ -17,6 +17,9 @@
 - [ ] Optionally disable building and installing tests
 - [ ] Create a very lightweight docker image
 
+## Maybe TODO
+- [ ] https://github.com/detailyang/pre-commit-shell (if we get more shell scripts)
+
 ## Style
 
 * file names all lowercase, no "-" or "_"
