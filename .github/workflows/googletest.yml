@@ -29,4 +29,3 @@ jobs:
           run: cmake --build build
         - name: googletest
           run: ./build/tests/earthorbittests
-

@@ -33,7 +33,9 @@
 * enumerator values are done like constants
 
 
+## useful commands
 
+* `pre-commit run --all-files`
 
 ## References
 * https://google.github.io/styleguide/cppguide.html
