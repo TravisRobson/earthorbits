@@ -5,10 +5,13 @@ on:
     push:
       branches: [main]
 
+
+# https://github.com/marketplace/actions/cppcheck-action
+# ^ is maybe an alternative worth exploring, but seems like 
+# an older cppcheck version...
 jobs:
-    # https://github.com/marketplace/actions/cppcheck-action
     ubuntu:
-        runs-on: ubuntu-latest
+        runs-on: macos-14
         steps:
         - name: checkout
           uses: actions/checkout@v3
