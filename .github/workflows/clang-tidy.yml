@@ -38,6 +38,7 @@ jobs:
             clang++ --version
             clang-tidy --version
             ls /usr/bin/clang-*
+          # https://clang-analyzer.llvm.org/scan-build.html
         - name: configure
           run: >-
             scan-build cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
