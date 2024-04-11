@@ -60,7 +60,12 @@ jobs:
 
         # Exercise runtime sanitizers
         - name: googletest
-          run: ASAN_OPTIONS="detect_stack_use_after_return=1" ./build/tests/earthorbittests --gtest_color=yes
+          run: >- 
+            ASAN_OPTIONS="detect_stack_use_after_return=1" 
+            ASAN_SYMBOLIZER_PATH=/usr/local/bin/llvm-symbolizer
+            ASAN_OPTIONS=detect_leaks=1
+            UBSAN_OPTIONS=print_stacktrace=1
+            ./build/tests/earthorbittests --gtest_color=yes
 
     macos:
         runs-on: macos-14
@@ -97,4 +102,5 @@ jobs:
             ASAN_OPTIONS="detect_stack_use_after_return=1" 
             ASAN_SYMBOLIZER_PATH=/usr/local/bin/llvm-symbolizer
             ASAN_OPTIONS=detect_leaks=1
+            UBSAN_OPTIONS=print_stacktrace=1
             ./build/tests/earthorbittests --gtest_color=yes
