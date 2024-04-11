@@ -22,7 +22,7 @@ jobs:
             sudo ./llvm.sh 17
             sudo apt-get -y install clang-tidy-17 clang-tools-17
 
-            ls /usr/bin/clang*
+            ls /usr/bin/
 
             sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-17 10
             sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-17 10
