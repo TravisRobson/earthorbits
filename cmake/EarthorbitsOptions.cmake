@@ -25,6 +25,12 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUA
         )
     endif()
 
+    if (EOB_COMPILE_SANITIZERS)
+        list(APPEND EARTHORBITS_PRIVATE_COMPILE_OPTIONS
+        -fsanitize=address
+        )
+    endif()
+
     message(STATUS "::EARTHORBITS:: ${EARTHORBITS_PRIVATE_COMPILE_OPTIONS}")
 else()
     message(FATAL_ERROR "::EARTHORBITS:: Unsupported compiler detected: ${CMAKE_CXX_COMPILER_ID}")
