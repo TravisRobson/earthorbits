@@ -22,15 +22,17 @@ jobs:
             sudo ./llvm.sh 17
             sudo apt-get -y install clang-tidy-17 clang-tools-17
 
-            ls /usr/bin/
+            # ls /usr/bin/
 
             sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-17 10
             sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-17 10
             sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-17 10
+            sudo update-alternatives --install /usr/bin/scan-build clang-tidy /usr/bin/scan-build-17 10
 
             sudo update-alternatives --set clang /usr/bin/clang-17
             sudo update-alternatives --set clang++ /usr/bin/clang++-17
             sudo update-alternatives --set clang-tidy /usr/bin/clang-tidy-17
+            sudo update-alternatives --set scan-build /usr/bin/scan-build-17
         - name: verify clang-17 installation
           run: |
             which clang
@@ -39,7 +41,6 @@ jobs:
             clang --version
             clang++ --version
             clang-tidy --version
-            ls /usr/bin/clang-*
           # https://clang-analyzer.llvm.org/scan-build.html
         - name: configure
           run: >-
