@@ -12,6 +12,7 @@ jobs:
         steps:
         - name: checkout
           uses: actions/checkout@v3
+
         - name: install clang-17
           # https://askubuntu.com/q/1473403
           # https://askubuntu.com/a/26518
@@ -33,6 +34,7 @@ jobs:
             sudo update-alternatives --set clang++ /usr/bin/clang++-17
             sudo update-alternatives --set clang-tidy /usr/bin/clang-tidy-17
             sudo update-alternatives --set scan-build /usr/bin/scan-build-17
+
         - name: verify clang-17 installation
           run: |
             which clang
@@ -41,32 +43,64 @@ jobs:
             clang --version
             clang++ --version
             clang-tidy --version
+
           # https://clang-analyzer.llvm.org/scan-build.html
         - name: configure
           run: >-
-            scan-build --status-bugs cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DEOB_ENABLE_CLANG_TIDY=ON
-            -DCMAKE_C_COMPILER=clang-17 -DCMAKE_CXX_COMPILER=clang++-17
+            scan-build --status-bugs cmake -S . -B build 
+            -DCMAKE_BUILD_TYPE=Debug
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON 
+            -DEOB_ENABLE_CLANG_TIDY=ON
+            -DCMAKE_C_COMPILER=clang-17 
+            -DCMAKE_CXX_COMPILER=clang++-17
+            -DEARTHORBITS_PRIVATE_COMPILE_OPTIONS=ON
+
         - name: build
           run: scan-build  --keep-going --status-bugs cmake --build build -j
+
+        # Exercise runtime sanitizers
+        - name: googletest
+          run: >- 
+            ASAN_OPTIONS="detect_stack_use_after_return=1" 
+            ASAN_SYMBOLIZER_PATH=/usr/local/bin/llvm-symbolizer
+            ASAN_OPTIONS=detect_leaks=1
+            UBSAN_OPTIONS=print_stacktrace=1
+            ./build/tests/earthorbittests --gtest_color=yes
+
     macos:
         runs-on: macos-14
         steps:
         - name: checkout
           uses: actions/checkout@v3
+
         - name: install clang-17
           # https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#example-of-adding-a-system-path
           run: |
             brew install llvm@17
             echo "$(brew --prefix llvm@17)/bin" >> $GITHUB_PATH
             echo "$PATH"
+
         - name: verify clang-17 installation
           run: |
             llvm-config --version
             clang++ --version
         - name: configure
+
           run: >-
-            scan-build --status-bugs cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DEOB_ENABLE_CLANG_TIDY=ON
+            scan-build --status-bugs cmake -S . -B build 
+            -DCMAKE_BUILD_TYPE=Debug
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON 
+            -DEOB_ENABLE_CLANG_TIDY=ON
+            -DEARTHORBITS_PRIVATE_COMPILE_OPTIONS=ON
+
         - name: build
           run: scan-build  --keep-going --status-bugs cmake --build build -j
+
+          # Exercise runtime sanitizers
+        - name: googletest
+          run: >- 
+            ASAN_OPTIONS="detect_stack_use_after_return=1" 
+            ASAN_SYMBOLIZER_PATH=/usr/local/bin/llvm-symbolizer
+            ASAN_OPTIONS=detect_leaks=1
+            UBSAN_OPTIONS=print_stacktrace=1
+            ./build/tests/earthorbittests --gtest_color=yes

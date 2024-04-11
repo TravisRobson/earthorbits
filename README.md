@@ -16,6 +16,7 @@
 - [ ] Warnings to errors in CI
 - [ ] Optionally disable building and installing tests
 - [ ] Create a very lightweight docker image
+- [ ] Verify clang sanitizers are actually doing something
 
 ## Maybe TODO
 - [ ] https://github.com/detailyang/pre-commit-shell (if we get more shell scripts)
@@ -36,6 +37,7 @@
 ## useful commands
 
 * `pre-commit run --all-files`
+* `otool -L build/tests/earthorbittests` 
 
 ## References
 * https://google.github.io/styleguide/cppguide.html
@@ -46,3 +48,5 @@
 * OSs supported by github: https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
 * https://clang-analyzer.llvm.org/available_checks.html#core_checkers
 * https://opensource.apple.com/source/clang/clang-23/clang/tools/clang/www/StaticAnalysisUsage.html 
+* https://github.com/Ericsson/CodeChecker
+* https://kristerw.blogspot.com/2018/03/detecting-incorrect-c-stl-usage.html
