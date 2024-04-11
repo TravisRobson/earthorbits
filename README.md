@@ -45,4 +45,4 @@
 * https://pre-commit.com
 * OSs supported by github: https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
 * https://clang-analyzer.llvm.org/available_checks.html#core_checkers
-* 
+* https://opensource.apple.com/source/clang/clang-23/clang/tools/clang/www/StaticAnalysisUsage.html 
