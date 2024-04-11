@@ -16,6 +16,7 @@
 - [ ] Warnings to errors in CI
 - [ ] Optionally disable building and installing tests
 - [ ] Create a very lightweight docker image
+- [ ] Verify clang sanitizers are actually doing something
 
 ## Maybe TODO
 - [ ] https://github.com/detailyang/pre-commit-shell (if we get more shell scripts)

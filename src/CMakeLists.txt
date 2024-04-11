@@ -18,12 +18,13 @@ target_include_directories(earthorbits
 # Prevent clang-tidy from checking fmt headers
 # https://davy.ai/ignore-3rd-party-headers-from-clang-tidy-in-cmake/
 target_include_directories(earthorbits SYSTEM PUBLIC ${CMAKE_BINARY_DIR}/_deps/fmt-src/include/)
- 
+
 # https://github.com/cpp-best-practices/cppbestpractices/blob/master/02-Use_the_Tools_Available.md#compilers
 target_compile_options(earthorbits 
     PRIVATE 
         ${EARTHORBITS_PRIVATE_COMPILE_OPTIONS}
 )
+target_compile_definitions(earthorbits PRIVATE ${EARTHORIBTS_PRIVATE_COMPILE_DEFINES})
 
 target_compile_features(earthorbits PRIVATE cxx_std_20)
 include(AddFmt)

@@ -22,6 +22,7 @@ endif()
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 include(FetchContent)
 include(EarthorbitsOptions)
+include(EarthorbitsDefines)
 
 enable_testing() # Has to be in this top-level CMake
 

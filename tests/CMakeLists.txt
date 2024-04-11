@@ -6,6 +6,7 @@ target_compile_options(earthorbittests PUBLIC
     ${EARTHORBIT_PRIVATE_COMPILE_OPTIONS}
 )
 target_compile_features(earthorbittests PRIVATE cxx_std_20)
+target_compile_definitions(earthorbittests PRIVATE ${EARTHORIBTS_PRIVATE_COMPILE_DEFINES})
 target_include_directories(earthorbittests
     PUBLIC
         $<INSTALL_INTERFACE:include>
