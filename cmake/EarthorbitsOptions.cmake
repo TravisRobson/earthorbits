@@ -26,8 +26,12 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang" OR CMAKE_CXX_COMPILER_ID STREQUA
     endif()
 
     if (EOB_COMPILE_SANITIZERS)
+        # https://clang.llvm.org/docs/AddressSanitizer.html
+        # https://clang.llvm.org/docs/ThreadSafetyAnalysis.html
         list(APPEND EARTHORBITS_PRIVATE_COMPILE_OPTIONS
-        -fsanitize=address
+            -fsanitize=address,undefined
+            -fno-omit-frame-pointer
+            -Wthread-safety
         )
     endif()
 
