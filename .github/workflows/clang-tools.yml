@@ -48,8 +48,8 @@ jobs:
             -DCMAKE_BUILD_TYPE=Debug
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON 
             -DEOB_ENABLE_CLANG_TIDY=ON
-            # -DCMAKE_C_COMPILER=clang-17 
-            # -DCMAKE_CXX_COMPILER=clang++-17
+            -DCMAKE_C_COMPILER=clang-17 
+            -DCMAKE_CXX_COMPILER=clang++-17
             -DEARTHORBITS_PRIVATE_COMPILE_OPTIONS=ON
         - name: build
           run: scan-build  --keep-going --status-bugs cmake --build build -j
