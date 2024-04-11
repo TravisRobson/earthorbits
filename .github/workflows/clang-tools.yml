@@ -44,9 +44,13 @@ jobs:
           # https://clang-analyzer.llvm.org/scan-build.html
         - name: configure
           run: >-
-            scan-build --status-bugs cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DEOB_ENABLE_CLANG_TIDY=ON
-            -DCMAKE_C_COMPILER=clang-17 -DCMAKE_CXX_COMPILER=clang++-17
+            scan-build --status-bugs cmake -S . -B build 
+            -DCMAKE_BUILD_TYPE=Debug
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON 
+            -DEOB_ENABLE_CLANG_TIDY=ON
+            # -DCMAKE_C_COMPILER=clang-17 
+            # -DCMAKE_CXX_COMPILER=clang++-17
+            -DEARTHORBITS_PRIVATE_COMPILE_OPTIONS=ON
         - name: build
           run: scan-build  --keep-going --status-bugs cmake --build build -j
     macos:
@@ -66,7 +70,10 @@ jobs:
             clang++ --version
         - name: configure
           run: >-
-            scan-build --status-bugs cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DEOB_ENABLE_CLANG_TIDY=ON
+            scan-build --status-bugs cmake -S . -B build 
+            -DCMAKE_BUILD_TYPE=Debug
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON 
+            -DEOB_ENABLE_CLANG_TIDY=ON
+            -DEARTHORBITS_PRIVATE_COMPILE_OPTIONS=ON
         - name: build
           run: scan-build  --keep-going --status-bugs cmake --build build -j
