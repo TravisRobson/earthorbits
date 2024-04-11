@@ -40,11 +40,11 @@ jobs:
             ls /usr/bin/clang-*
         - name: configure
           run: >-
-            cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+            scan-build cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DEOB_ENABLE_CLANG_TIDY=ON
             -DCMAKE_C_COMPILER=clang-17 -DCMAKE_CXX_COMPILER=clang++-17
         - name: build
-          run: cmake --build build
+          run: scan-build cmake --build build -j
     macos:
         runs-on: macos-14
         steps:
@@ -62,7 +62,7 @@ jobs:
             clang++ --version
         - name: configure
           run: >-
-            cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+            scan-build cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DEOB_ENABLE_CLANG_TIDY=ON
         - name: build
-          run: cmake --build build
+          run: scan-build cmake --build build -j
