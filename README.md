@@ -49,3 +49,4 @@
 * https://clang-analyzer.llvm.org/available_checks.html#core_checkers
 * https://opensource.apple.com/source/clang/clang-23/clang/tools/clang/www/StaticAnalysisUsage.html 
 * https://github.com/Ericsson/CodeChecker
+* https://kristerw.blogspot.com/2018/03/detecting-incorrect-c-stl-usage.html
