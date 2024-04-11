@@ -1,4 +1,4 @@
-name: clang-tidy
+name: clang-tools
 
 on:
     pull_request:
@@ -20,15 +20,19 @@ jobs:
             wget https://apt.llvm.org/llvm.sh
             chmod +x llvm.sh
             sudo ./llvm.sh 17
-            sudo apt-get -y install clang-tidy-17
+            sudo apt-get -y install clang-tidy-17 clang-tools-17
+
+            # ls /usr/bin/
 
             sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-17 10
             sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-17 10
             sudo update-alternatives --install /usr/bin/clang-tidy clang-tidy /usr/bin/clang-tidy-17 10
+            sudo update-alternatives --install /usr/bin/scan-build scan-build /usr/bin/scan-build-17 10
 
             sudo update-alternatives --set clang /usr/bin/clang-17
             sudo update-alternatives --set clang++ /usr/bin/clang++-17
             sudo update-alternatives --set clang-tidy /usr/bin/clang-tidy-17
+            sudo update-alternatives --set scan-build /usr/bin/scan-build-17
         - name: verify clang-17 installation
           run: |
             which clang
@@ -37,14 +41,14 @@ jobs:
             clang --version
             clang++ --version
             clang-tidy --version
-            ls /usr/bin/clang-*
+          # https://clang-analyzer.llvm.org/scan-build.html
         - name: configure
           run: >-
-            cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+            scan-build --status-bugs cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DEOB_ENABLE_CLANG_TIDY=ON
             -DCMAKE_C_COMPILER=clang-17 -DCMAKE_CXX_COMPILER=clang++-17
         - name: build
-          run: cmake --build build
+          run: scan-build  --keep-going --status-bugs cmake --build build -j
     macos:
         runs-on: macos-14
         steps:
@@ -62,7 +66,7 @@ jobs:
             clang++ --version
         - name: configure
           run: >-
-            cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+            scan-build --status-bugs cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DEOB_ENABLE_CLANG_TIDY=ON
         - name: build
-          run: cmake --build build
+          run: scan-build  --keep-going --status-bugs cmake --build build -j

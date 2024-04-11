@@ -95,7 +95,7 @@ Tle ParseTle(std::string &str) {
 
     constexpr size_t ly_size = 2;
     tle.line_1.launch_year = std::stoi(line_1.substr(pos, ly_size));
-    pos += ly_size;
+    // pos += ly_size;
 
   } catch (const std::out_of_range &e) {
     //  "if the converted value would fall out of the range of

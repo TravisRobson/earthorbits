@@ -34,7 +34,7 @@ jobs:
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DEOB_ENABLE_CLANG_TIDY=ON
 
         - name: build
-          run: cmake --build build
+          run: cmake --build build -j
 
         - name: googletest
           run: ./build/tests/earthorbittests --gtest_color=yes --gtest_output=xml
