@@ -56,12 +56,10 @@ bool is_valid(const std::string &str,
   for (char c : valid_chars) {
     mask[static_cast<size_t>(c)] = true;
   }
-  for (char c : str) {
-    if (!mask[static_cast<size_t>(c)]) {
-      return false;
-    }
-  }
-  return true;
+
+  return !std::any_of(str.begin(), str.end(), [&mask](char c) {
+    return !mask[static_cast<size_t>(c)];
+  });
 }
 
 /// @brief Convert TLE "exponential" string to double
@@ -96,7 +94,7 @@ double exponent_to_double(const std::string &sub_str) {
   }
 
   double exp_sign = 1.0;
-  switch (sub_str.end()[-2]) {
+  switch (sub_str[sub_str.size() - 2]) {
     case '-':
       exp_sign = -1.0;
       break;
