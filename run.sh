@@ -7,3 +7,4 @@ scan-build cmake -S . -B build \
     -DEOB_ENABLE_CLANG_TIDY=OFF \
     -DEOB_COMPILE_WARNINGS_AS_ERRORS=ON
 scan-build --view cmake --build build -j 6
+./build/tests/earthorbittests
