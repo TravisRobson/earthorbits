@@ -20,6 +20,8 @@ template <>
 struct fmt::formatter<eob::Tle> : ostream_formatter {};
 
 namespace eob {
+/// TODO(tjr) need to determine the exceptions this function can
+/// throw, but at least right now we only use for tests
 std::ostream &operator<<(std::ostream &os, const Tle &tle) {
   os << fmt::format(
       R"({{line_number={}, satellite_number={}, classification={}, launch_year={}, )"
@@ -53,7 +55,7 @@ static_assert(
     "platform doesn't support correction function of safe_int_to_size_t");
 /// @brief Safely convert int to size_t
 /// @see https://stackoverflow.com/a/27513865
-constexpr size_t safe_int_to_size_t(int val) {
+constexpr size_t safe_int_to_size_t(int val) noexcept {
   return (val < 0) ? __SIZE_MAX__
                    : static_cast<size_t>(static_cast<unsigned>(val));
 }
@@ -61,15 +63,23 @@ constexpr size_t safe_int_to_size_t(int val) {
 // https://codereview.stackexchange.com/a/39957
 constexpr std::string_view tle_valid_chars =
     "ABCDEFGHIJKLMNOPQRSTUV+- 0123456789.";
-bool is_valid(const std::string &str,
-              const std::string_view &valid_chars) noexcept {
+/// @brief Check if all characters of string exist in valid character list
+/// @param str string to be checked
+/// @param valid_chars string containing list of valid characters
+///
+/// @throws std::out_of_range from std::array::at
+///
+/// @return true if str is valid, false if str is invalid
+bool contains_valid_characters(const std::string &str,
+                               const std::string_view &valid_chars) noexcept {
   std::array<bool, safe_int_to_size_t(std::numeric_limits<char>::max())> mask{};
   for (char c : valid_chars) {
-    mask[safe_int_to_size_t(c)] = true;
+    mask.at(safe_int_to_size_t(c)) = true;
   }
 
-  return !std::any_of(str.begin(), str.end(),
-                      [&mask](char c) { return !mask[safe_int_to_size_t(c)]; });
+  return !std::any_of(str.begin(), str.end(), [&mask](char c) {
+    return !mask.at(safe_int_to_size_t(c));
+  });
 }
 
 /// @brief Convert TLE "exponential" string to double
@@ -128,6 +138,7 @@ double exponent_to_double(const std::string &sub_str) {
 /// The checksum is (Modulo 10) (Letters, blanks, periods, plus signs = 0; minus
 /// signs = 1)
 int compute_checksum(const std::string &line) {
+  assert(!line.empty() && "line should have at least one character");
   int sum = 0;
   for (char c : line.substr(0, line.size() - 1)) {
     if (std::isdigit(c)) {
@@ -142,7 +153,7 @@ int compute_checksum(const std::string &line) {
 
 /// @brief Extract only filename from std::source_location::file_name()
 /// @see https://stackoverflow.com/a/38237385
-constexpr const char *filename(const char *path) {
+constexpr const char *filename(const char *path) noexcept {
   const char *file = path;
   while (*path) {
     if (*path++ == '/') {
@@ -155,7 +166,7 @@ constexpr const char *filename(const char *path) {
 /// @brief  Utility which adds file and line number to message
 std::string enrich_msg(
     std::string_view in,
-    std::source_location loc = std::source_location::current()) {
+    std::source_location loc = std::source_location::current()) noexcept {
   return fmt::format(R"({}:{} {})", filename(loc.file_name()), loc.line(), in);
 }
 
@@ -267,19 +278,19 @@ Tle ParseTle(const std::string &tle_str) {
   }
   assert(ss.eof() && "Should only be two lines in TLE stringstream");
 
-  if (!is_valid(line_1, tle_valid_chars)) {
-    auto msg = enrich_msg(fmt::format(
-        R"(TLE line 1 contains invalid characters, line_1="{}")", line_1));
-    throw EobError(msg);
-  }
-
-  if (!is_valid(line_2, tle_valid_chars)) {
-    auto msg = enrich_msg(fmt::format(
-        R"(TLE line 2 contains invalid characters, line_2="{}")", line_2));
-    throw EobError(msg);
-  }
-
   try {
+    if (!contains_valid_characters(line_1, tle_valid_chars)) {
+      auto msg = enrich_msg(fmt::format(
+          R"(TLE line 1 contains invalid characters, line_1="{}")", line_1));
+      throw EobError(msg);
+    }
+
+    if (!contains_valid_characters(line_2, tle_valid_chars)) {
+      auto msg = enrich_msg(fmt::format(
+          R"(TLE line 2 contains invalid characters, line_2="{}")", line_2));
+      throw EobError(msg);
+    }
+
     size_t pos = 0;
 
     {
