@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cctype>
 #include <cstddef>
 #include <iostream>
 #include <limits>
@@ -71,7 +72,7 @@ constexpr std::string_view tle_valid_chars =
 ///
 /// @return true if str is valid, false if str is invalid
 bool contains_valid_characters(const std::string &str,
-                               const std::string_view &valid_chars) noexcept {
+                               const std::string_view &valid_chars) {
   std::array<bool, safe_int_to_size_t(std::numeric_limits<char>::max())> mask{};
   for (char c : valid_chars) {
     mask.at(safe_int_to_size_t(c)) = true;
@@ -101,8 +102,6 @@ double exponent_to_double(const std::string &sub_str) {
       prefix_sign = -1.0;
       break;
     case '+':
-      prefix_sign = 1.0;
-      break;
     case ' ':
       prefix_sign = 1.0;
       break;
@@ -132,6 +131,7 @@ double exponent_to_double(const std::string &sub_str) {
   double left = std::stod("0." + sub_str.substr(1, sub_str.size() - 2));
   double right = std::stod(sub_str.substr(sub_str.size() - 1));
 
+  /// NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
   return prefix_sign * left * std::pow(10.0, exp_sign * right);
 }
 
@@ -141,7 +141,7 @@ int compute_checksum(const std::string &line) {
   assert(!line.empty() && "line should have at least one character");
   int sum = 0;
   for (char c : line.substr(0, line.size() - 1)) {
-    if (std::isdigit(c)) {
+    if (std::isdigit(c) != 0) {
       sum += static_cast<int>(c - '0');
     } else if (c == '-') {
       sum += 1;
@@ -156,6 +156,8 @@ int compute_checksum(const std::string &line) {
 constexpr const char *filename(const char *path) noexcept {
   const char *file = path;
   while (*path) {
+    /// TODO(tjr) Find a safer version of this function
+    /// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     if (*path++ == '/') {
       file = path;
     }
@@ -179,6 +181,8 @@ std::optional<std::string> check_inclusive_domain(
     return std::nullopt;
   }
 
+  // unfortunately this lint would lead to less performant code
+  /// NOLINTNEXTLINE(modernize-return-braced-init-list])
   return std::optional<std::string>(enrich_msg(
       fmt::format(R"(invalid {}, value={}, lower_bound={}, upper_bound={})",
                   description, value, lower_bound, upper_bound)));
@@ -239,6 +243,7 @@ std::optional<std::string> check_inclusive_domain(
 ///
 /// TODO(tjr) should I make this return std::optional for failure modes?
 /// TODO(tjr) can any of error logic code be consolidated?
+/// NOLINTNEXTLINE(readability-function-cognitive-complexity)
 Tle ParseTle(const std::string &tle_str) {
   // two lines of 69 characters and a line break
   constexpr int expected_length = 2 * tle_line_size + 1;
