@@ -11,6 +11,7 @@ Checks: "*,
          -zircon-*,
          -modernize-use-trailing-return-type,
          -readability-identifier-length,
+         -misc-const-correctness,
 "
 WarningsAsErrors: true
 HeaderFilterRegex: ''

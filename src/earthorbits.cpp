@@ -3,6 +3,7 @@
 #include <fmt/core.h>
 #include <fmt/ostream.h>
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cstddef>
@@ -13,6 +14,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 
 template <>
 struct fmt::formatter<eob::Tle> : ostream_formatter {};
@@ -46,20 +48,28 @@ std::ostream &operator<<(std::ostream &os, const Tle &tle) {
 namespace {
 constexpr int tle_line_size = 69;
 
+static_assert(
+    sizeof(size_t) >= sizeof(int),
+    "platform doesn't support correction function of safe_int_to_size_t");
+/// @brief Safely convert int to size_t
+/// @see https://stackoverflow.com/a/27513865
+constexpr size_t safe_int_to_size_t(int val) {
+  return (val < 0) ? __SIZE_MAX__
+                   : static_cast<size_t>(static_cast<unsigned>(val));
+}
+
 // https://codereview.stackexchange.com/a/39957
 constexpr std::string_view tle_valid_chars =
     "ABCDEFGHIJKLMNOPQRSTUV+- 0123456789.";
 bool is_valid(const std::string &str,
               const std::string_view &valid_chars) noexcept {
-  std::array<bool, static_cast<size_t>(std::numeric_limits<char>::max())>
-      mask{};
+  std::array<bool, safe_int_to_size_t(std::numeric_limits<char>::max())> mask{};
   for (char c : valid_chars) {
-    mask[static_cast<size_t>(c)] = true;
+    mask[safe_int_to_size_t(c)] = true;
   }
 
-  return !std::any_of(str.begin(), str.end(), [&mask](char c) {
-    return !mask[static_cast<size_t>(c)];
-  });
+  return !std::any_of(str.begin(), str.end(),
+                      [&mask](char c) { return !mask[safe_int_to_size_t(c)]; });
 }
 
 /// @brief Convert TLE "exponential" string to double
