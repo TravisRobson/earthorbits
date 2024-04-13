@@ -63,5 +63,5 @@ std::ostream &operator<<(std::ostream &os, const Tle &tle);
 /// @return Tle struct containing parsed data
 ///
 /// @post return valid (filled out) Tle instance
-Tle ParseTle(std::string &str);
+Tle ParseTle(const std::string &str);
 }  // namespace eob

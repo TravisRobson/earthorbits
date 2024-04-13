@@ -38,6 +38,7 @@
 
 * `pre-commit run --all-files`
 * `otool -L build/tests/earthorbittests` 
+* open ~/Library/Logs/DiagnosticReports/earthorbittests-*.ips
 
 ## References
 * https://google.github.io/styleguide/cppguide.html
