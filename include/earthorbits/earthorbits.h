@@ -37,6 +37,15 @@ struct TleLine1 {
 /// @see https://celestrak.org/columns/v04n03/
 struct TleLine2 {
   int line_number;
+  int satellite_number;
+  double inclination;           ///< degrees
+  double raan;                  ///< degrees, Right Ascension of Ascending Node
+  double eccentricity;          ///< [0, 1]
+  double argument_of_perigree;  ///< degrees
+  double mean_anomaly;          ///< degrees
+  double mean_motion;           ///< revolutions per day
+  double rev_at_epoch;          ///< revolution number at epoch
+  int checksum;
 };
 
 /// @brief Two-line element
@@ -63,5 +72,5 @@ std::ostream &operator<<(std::ostream &os, const Tle &tle);
 /// @return Tle struct containing parsed data
 ///
 /// @post return valid (filled out) Tle instance
-Tle ParseTle(std::string &str);
+Tle ParseTle(const std::string &str);
 }  // namespace eob

@@ -11,7 +11,9 @@ Checks: "*,
          -zircon-*,
          -modernize-use-trailing-return-type,
          -readability-identifier-length,
+         -misc-const-correctness,
 "
 WarningsAsErrors: true
 HeaderFilterRegex: ''
 UseColor: true
+IgnoredFloatingPointValues: "10.0,0.0,360.0,180.0"
