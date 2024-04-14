@@ -131,7 +131,6 @@ double exponent_to_double(const std::string &sub_str) {
   double left = std::stod("0." + sub_str.substr(1, sub_str.size() - 2));
   double right = std::stod(sub_str.substr(sub_str.size() - 1));
 
-  /// NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
   return prefix_sign * left * std::pow(10.0, exp_sign * right);
 }
 
