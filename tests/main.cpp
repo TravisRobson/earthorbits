@@ -7,6 +7,22 @@
 
 using namespace eob;
 
+TEST(EarthorbitTest, MyException) {
+  auto foo = []() { throw MyException<int>("foo failed", 1); };
+  auto bar = [foo]() {
+    try {
+      foo();
+    } catch (MyException<int> &e) {
+      std::cout << "where=" << e.where() << ", what=" << e.what()
+                << ", data=" << e.data() << '\n';
+      e.what() += "here is some extra info!";
+      throw;
+    };
+  };
+
+  ASSERT_THROW(bar(), MyException<int>);
+}
+
 TEST(EarthorbitTest, ParseTLES) {
   {
     std::string s =
