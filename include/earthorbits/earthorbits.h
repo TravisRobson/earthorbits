@@ -1,19 +1,33 @@
 #pragma once
 
 #include <iostream>
+#include <source_location>
 #include <stdexcept>
 
 namespace eob {
-class EobError : public std::runtime_error {
- public:
-  explicit EobError(const std::string &s) : std::runtime_error(s) {}
-};
+inline std::ostream &operator<<(std::ostream &os,
+                                const std::source_location &loc) {
+  return os << loc.file_name() << ':' << loc.line() << ", function `"
+            << loc.function_name() << '`';
+}
 
-/// TODO how am I using this exception differently to warrant
-/// it's existence?
-class InvalidPrecondition : public std::runtime_error {
+template <typename DATA_T>
+class MyException {
  public:
-  explicit InvalidPrecondition(const std::string &s) : std::runtime_error(s) {}
+  MyException(std::string str, DATA_T data,
+              const std::source_location &loc = std::source_location::current())
+      : errorStr_{std::move(str)}, data_{std::move(data)}, location_{loc} {}
+
+  std::string &what() { return errorStr_; }
+  const std::string &what() const noexcept { return errorStr_; }
+  DATA_T &data() { return data_; }
+  const DATA_T &data() const noexcept { return data_; }
+  const std::source_location &where() const noexcept { return location_; }
+
+ private:
+  std::string errorStr_;
+  DATA_T data_;
+  std::source_location location_;
 };
 
 /// @see https://celestrak.org/columns/v04n03/
@@ -44,7 +58,7 @@ struct TleLine2 {
   double argument_of_perigree;  ///< degrees
   double mean_anomaly;          ///< degrees
   double mean_motion;           ///< revolutions per day
-  double rev_at_epoch;          ///< revolution number at epoch
+  int rev_at_epoch;             ///< revolution number at epoch
   int checksum;
 };
 
@@ -72,5 +86,5 @@ std::ostream &operator<<(std::ostream &os, const Tle &tle);
 /// @return Tle struct containing parsed data
 ///
 /// @post return valid (filled out) Tle instance
-Tle ParseTle(const std::string &str);
+[[nodiscard]] Tle ParseTle(const std::string &str);
 }  // namespace eob

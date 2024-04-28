@@ -18,6 +18,7 @@
 - [ ] Create a very lightweight docker image
 - [ ] Verify clang sanitizers are actually doing something
 - [ ] Harden the `ParseTle` function, it can face a much wider variety of valid and invalid inputs than I have tested against. (Important because this function will likely be fed inputs we don't fully control.)
+- [ ] Add Google benchmarks to github actions (and save the report)
 
 ## Maybe TODO
 - [ ] https://github.com/detailyang/pre-commit-shell (if we get more shell scripts)

@@ -8,10 +8,10 @@
 #include <cassert>
 #include <cctype>
 #include <cstddef>
+#include <functional>
 #include <iostream>
 #include <limits>
 #include <optional>
-#include <source_location>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -51,35 +51,46 @@ std::ostream &operator<<(std::ostream &os, const Tle &tle) {
 namespace {
 constexpr int tle_line_size = 69;
 
+static_assert(sizeof(char) == 1, "Have only programmed assuming char is 1B");
 static_assert(
     sizeof(size_t) >= sizeof(int),
     "platform doesn't support correction function of safe_int_to_size_t");
+
 /// @brief Safely convert int to size_t
 /// @see https://stackoverflow.com/a/27513865
-constexpr size_t safe_int_to_size_t(int val) noexcept {
+[[nodiscard]] constexpr size_t safe_int_to_size_t(int val) noexcept {
   return (val < 0) ? __SIZE_MAX__
                    : static_cast<size_t>(static_cast<unsigned>(val));
 }
 
-// https://codereview.stackexchange.com/a/39957
 constexpr std::string_view tle_valid_chars =
-    "ABCDEFGHIJKLMNOPQRSTUV+- 0123456789.";
+    "ABCDEFGHIJKLMNOPQRSTUV+- 0123456789.\n";
+constexpr auto max_char_as_int =
+    safe_int_to_size_t(std::numeric_limits<char>::max());
+
+constexpr std::array<bool, max_char_as_int> get_valid_tle_char_mask() {
+  std::array<bool, max_char_as_int> mask{};  // initialize all to false
+  // mark valid characters as true
+  for (char c : tle_valid_chars) {
+    mask.at(safe_int_to_size_t(c)) = true;
+  }
+  return mask;
+}
+
 /// @brief Check if all characters of string exist in valid character list
 /// @param str string to be checked
 /// @param valid_chars string containing list of valid characters
 ///
-/// @throws std::out_of_range from std::array::at
+/// @see https://codereview.stackexchange.com/a/39957
 ///
-/// @return true if str is valid, false if str is invalid
-bool contains_valid_characters(const std::string &str,
-                               const std::string_view &valid_chars) {
-  std::array<bool, safe_int_to_size_t(std::numeric_limits<char>::max())> mask{};
-  for (char c : valid_chars) {
-    mask.at(safe_int_to_size_t(c)) = true;
-  }
-
+/// @return if valid return std::nullopt, else return position of first invalid
+/// char
+[[nodiscard]] bool contains_valid_tle_chars(const std::string &str) noexcept {
+  auto mask = get_valid_tle_char_mask();
   return !std::any_of(str.begin(), str.end(), [&mask](char c) {
-    return !mask.at(safe_int_to_size_t(c));
+    // didn't use std::array::at because how mask is constructed it should
+    // be impossible to exceed its bounds
+    return !mask[safe_int_to_size_t(c)];
   });
 }
 
@@ -88,12 +99,12 @@ bool contains_valid_characters(const std::string &str,
 ///
 /// @pre Expects string to have at least 3 characters
 ///
-/// @throws EobError if sub_str has unexpected format
+/// @throws MyException if sub_str has unexpected format
 /// @throw std::out_of_range from std::stod
 /// @throws std::invalid_argument from std::stod
 ///
 /// @return double, coverted from sub_str
-double exponent_to_double(const std::string &sub_str) {
+[[nodiscard]] double exponent_to_double(const std::string &sub_str) {
   assert(sub_str.size() > 3 && "exponent_to_double() string not large enough");
 
   double prefix_sign = 1.0;
@@ -106,10 +117,11 @@ double exponent_to_double(const std::string &sub_str) {
       prefix_sign = 1.0;
       break;
     default:
-      auto loc = std::source_location::current();
-      auto msg = fmt::format(R"({}:{} invalid exponential field, sub_str="{}")",
-                             loc.file_name(), loc.function_name(), sub_str);
-      throw EobError(msg);
+      throw MyException<std::string>(
+          fmt::format(
+              R"(TLE contains invalid exponential field, expected "+", "-", or " ", found="{}")",
+              sub_str[0]),
+          sub_str);
   }
 
   double exp_sign = 1.0;
@@ -121,10 +133,11 @@ double exponent_to_double(const std::string &sub_str) {
       exp_sign = 1.0;
       break;
     default:
-      auto loc = std::source_location::current();
-      auto msg = fmt::format(R"({}:{} invalid exponential field, sub_str="{}")",
-                             loc.file_name(), loc.function_name(), sub_str);
-      throw EobError(msg);
+      throw MyException<std::string>(
+          fmt::format(
+              R"(TLE contains invalid exponential field, expected "+" or "-", found="{}")",
+              sub_str[sub_str.size() - 2]),
+          sub_str);
   }
 
   // skip first character when finding position of sign
@@ -136,7 +149,7 @@ double exponent_to_double(const std::string &sub_str) {
 
 /// The checksum is (Modulo 10) (Letters, blanks, periods, plus signs = 0; minus
 /// signs = 1)
-int compute_checksum(const std::string &line) {
+[[nodiscard]] int compute_checksum(const std::string &line) {
   assert(!line.empty() && "line should have at least one character");
   int sum = 0;
   for (char c : line.substr(0, line.size() - 1)) {
@@ -150,31 +163,9 @@ int compute_checksum(const std::string &line) {
   return sum % 10;
 }
 
-/// @brief Extract only filename from std::source_location::file_name()
-/// @see https://stackoverflow.com/a/38237385
-constexpr const char *filename(const char *path) noexcept {
-  const char *file = path;
-  while (*path) {
-    /// TODO(tjr) Find a safer version of this function
-    /// NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    if (*path++ == '/') {
-      file = path;
-    }
-  }
-  return file;
-}
-
-/// @brief  Utility which adds file and line number to message
-std::string enrich_msg(
-    std::string_view in,
-    std::source_location loc = std::source_location::current()) noexcept {
-  return fmt::format(R"({}:{} {})", filename(loc.file_name()), loc.line(), in);
-}
-
 /// @brief Check domain of parameter inclusive [lower_bound, upper_bound]
-std::optional<std::string> check_inclusive_domain(
-    double value, double lower_bound, double upper_bound,
-    std::string_view description) {
+[[nodiscard]] std::optional<std::string> is_within_inclusive_domain(
+    double value, double lower_bound, double upper_bound) {
   assert(lower_bound < upper_bound && "lower_bound must be < upper_bound");
   if (lower_bound <= value && value <= upper_bound) {
     return std::nullopt;
@@ -182,9 +173,9 @@ std::optional<std::string> check_inclusive_domain(
 
   // unfortunately this lint would lead to less performant code
   /// NOLINTNEXTLINE(modernize-return-braced-init-list])
-  return std::optional<std::string>(enrich_msg(
-      fmt::format(R"(invalid {}, value={}, lower_bound={}, upper_bound={})",
-                  description, value, lower_bound, upper_bound)));
+  return std::optional<std::string>(
+      fmt::format(R"(value={}, lower_bound={}, upper_bound={})", value,
+                  lower_bound, upper_bound));
 }
 }  // namespace
 
@@ -240,366 +231,392 @@ std::optional<std::string> check_inclusive_domain(
 /// The checksum is (Modulo 10) (Letters, blanks, periods, plus signs = 0; minus
 /// signs = 1)
 ///
-/// TODO(tjr) should I make this return std::optional for failure modes?
 /// TODO(tjr) can any of error logic code be consolidated?
 /// NOLINTNEXTLINE(readability-function-cognitive-complexity)
-Tle ParseTle(const std::string &tle_str) {
+[[nodiscard]] Tle ParseTle(const std::string &tle_str) {
   // two lines of 69 characters and a line break
   constexpr int expected_length = 2 * tle_line_size + 1;
   if (tle_str.size() != expected_length) {
-    auto msg = enrich_msg(fmt::format(
-        R"(tle string has invalid size, expected={}, value={}, tle_str="{}")",
-        expected_length, tle_str.size(), tle_str));
-    throw EobError(msg);
+    throw MyException<std::string>(
+        fmt::format(R"(TLE has invalid size, size={}, expected={})",
+                    tle_str.size(), expected_length),
+        tle_str);
   }
 
-  constexpr size_t line_break_pos = 69;
-  if (tle_str[line_break_pos] != '\n') {
-    auto msg = enrich_msg(fmt::format(
-        R"(tle string is invalid, linebreak not at expected position, )"
-        R"(value={}, tle_str="{}")",
-        tle_str.size(), tle_str));
-    throw EobError(msg);
+  if (tle_str[tle_line_size] != '\n') {
+    throw MyException<std::string>(
+        fmt::format(
+            R"(TLE invalid, expected line break at position={:d}, found="{}")",
+            tle_line_size, tle_str[tle_line_size]),
+        tle_str);
+  }
+
+  if (!contains_valid_tle_chars(tle_str)) {
+    throw MyException<std::string>(
+        fmt::format(R"(TLE contains invalid char(s))"), tle_str);
   }
 
   Tle tle;
   std::stringstream ss(tle_str);
+
   std::string line_1;
-  std::string line_2;
   std::getline(ss, line_1, '\n');
-  assert(line_1.size() == 69 && "TLE line 1 should be 69 characters");
+  assert(line_1.size() == tle_line_size &&
+         "TLE line 1 should be 69 characters");
   if (ss.fail()) {
-    auto msg = enrich_msg(
-        fmt::format(R"(failed to read TLE line 1, tle_str="{}")", tle_str));
-    throw EobError(msg);
+    throw MyException<std::string>(fmt::format(R"(failed to read TLE line 1)"),
+                                   tle_str);
   }
+
+  std::string line_2;
   std::getline(ss, line_2, '\n');
-  assert(line_2.size() == 69 && "TLE line 2 should be 69 characters");
+  assert(line_2.size() == tle_line_size &&
+         "TLE line 2 should be 69 characters");
   if (ss.fail()) {
-    auto msg = enrich_msg(
-        fmt::format(R"(failed to read TLE line 2, tle_str="{}")", tle_str));
-    throw EobError(msg);
+    throw MyException<std::string>(fmt::format(R"(failed to read TLE line 2)"),
+                                   tle_str);
   }
   assert(ss.eof() && "Should only be two lines in TLE stringstream");
 
-  try {
-    if (!contains_valid_characters(line_1, tle_valid_chars)) {
-      auto msg = enrich_msg(fmt::format(
-          R"(TLE line 1 contains invalid characters, line_1="{}")", line_1));
-      throw EobError(msg);
+  struct PosSizeParser {
+    size_t start;
+    size_t size;
+    std::function<void(const std::string &)> parser;
+  };
+
+  /// TODO is there a way to accomplish this without std::function?
+  std::array<PosSizeParser, 14> line_1_parsers{
+      PosSizeParser{
+          .start = 0,
+          .size = 1,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_1.line_number = std::stoi(substr);
+              },
+      },
+      PosSizeParser{
+          .start = 2,
+          .size = 5,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_1.satellite_number = std::stoi(substr);
+              },
+      },
+      PosSizeParser{
+          .start = 7,
+          .size = 1,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_1.classification = substr[0];
+              },
+      },
+      PosSizeParser{
+          .start = 9,
+          .size = 2,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_1.launch_year = std::stoi(substr);
+              },
+      },
+      PosSizeParser{
+          .start = 11,
+          .size = 3,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_1.launch_number = std::stoi(substr);
+              },
+      },
+      PosSizeParser{
+          .start = 14,
+          .size = 3,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_1.launch_piece = substr;
+              },
+      },
+      PosSizeParser{
+          .start = 18,
+          .size = 2,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_1.epoch_year = std::stoi(substr);
+              },
+      },
+      PosSizeParser{
+          .start = 20,
+          .size = 12,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_1.epoch_day = std::stod(substr);
+              },
+      },
+      PosSizeParser{
+          .start = 33,
+          .size = 10,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_1.mean_motion_dot = std::stod(substr);
+              },
+      },
+      PosSizeParser{
+          .start = 44,
+          .size = 8,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_1.mean_motion_ddot = exponent_to_double(substr);
+              },
+      },
+      PosSizeParser{
+          .start = 53,
+          .size = 8,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_1.bstar_drag = exponent_to_double(substr);
+              },
+      },
+      PosSizeParser{
+          .start = 62,
+          .size = 1,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_1.ephemeris_type = std::stoi(substr);
+              },
+      },
+      PosSizeParser{
+          .start = 64,
+          .size = 4,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_1.element_number = std::stoi(substr);
+              },
+      },
+      PosSizeParser{
+          .start = 68,
+          .size = 1,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_1.checksum = std::stoi(substr);
+              },
+      },
+  };
+
+  for (auto &[start, size, parser] : line_1_parsers) {
+    // we've checked line sizes so any errors indexing would be coding errors
+    assert(0 <= start && start < line_1.size());
+    assert(0 < size && size < line_1.size());
+    assert(start + size <= line_1.size());
+
+    auto substr = line_1.substr(start, size);
+    try {
+      parser(substr);
+    } catch (std::exception &e) {
+      throw MyException<std::string>(
+          fmt::format(
+              R"(Failed to parse TLE line 1 token, start={}, size={}, substr="{}")",
+              start, size, substr),
+          line_1);
+    } catch (...) {
+      throw MyException<std::string>(
+          fmt::format(
+              R"(Failed to parse TLE line 1 token, start={}, size={}, substr="{}")",
+              start, size, substr),
+          line_1);
     }
+  }
 
-    if (!contains_valid_characters(line_2, tle_valid_chars)) {
-      auto msg = enrich_msg(fmt::format(
-          R"(TLE line 2 contains invalid characters, line_2="{}")", line_2));
-      throw EobError(msg);
+  /// TODO is there a way to accomplish this without std::function?
+  std::array<PosSizeParser, 10> line_2_parsers{
+      PosSizeParser{
+          .start = 0,
+          .size = 1,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_2.line_number = std::stoi(substr);
+              },
+      },
+      PosSizeParser{
+          .start = 2,
+          .size = 5,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_2.satellite_number = std::stoi(substr);
+              },
+      },
+      PosSizeParser{
+          .start = 8,
+          .size = 8,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_2.inclination = std::stod(substr);
+              },
+      },
+      PosSizeParser{
+          .start = 17,
+          .size = 8,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_2.raan = std::stod(substr);
+              },
+      },
+      PosSizeParser{
+          .start = 26,
+          .size = 7,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_2.eccentricity = std::stod("0." + substr);
+              },
+      },
+      PosSizeParser{
+          .start = 34,
+          .size = 8,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_2.argument_of_perigree = std::stod(substr);
+              },
+      },
+      PosSizeParser{
+          .start = 43,
+          .size = 8,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_2.mean_anomaly = std::stod(substr);
+              },
+      },
+      PosSizeParser{
+          .start = 52,
+          .size = 11,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_2.mean_motion = std::stod(substr);
+              },
+      },
+      PosSizeParser{
+          .start = 63,
+          .size = 5,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_2.rev_at_epoch = std::stoi(substr);
+              },
+      },
+      PosSizeParser{
+          .start = 68,
+          .size = 1,
+          .parser =
+              [&tle](const std::string &substr) {
+                tle.line_2.checksum = std::stoi(substr);
+              },
+      },
+  };
+
+  for (auto &[start, size, parser] : line_2_parsers) {
+    // we've checked line sizes so any errors indexing would be coding errors
+    assert(0 <= start && start < line_2.size());
+    assert(0 < size && size < line_2.size());
+    assert(start + size <= line_2.size());
+
+    auto substr = line_2.substr(start, size);
+    try {
+      parser(substr);
+    } catch (std::exception &e) {
+      throw MyException<std::string>(
+          fmt::format(
+              R"(Failed to parse TLE line 2 token, start={}, size={}, substr="{}")",
+              start, size, substr),
+          line_2);
+    } catch (...) {
+      throw MyException<std::string>(
+          fmt::format(
+              R"(Failed to parse TLE line 2 token, start={}, size={}, substr="{}")",
+              start, size, substr),
+          line_2);
     }
-
-    size_t pos = 0;
-
-    {
-      constexpr size_t n = 1;
-      tle.line_1.line_number = std::stoi(line_1.substr(pos, n));
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    ++pos;  //  a space
-    assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-
-    {
-      constexpr size_t n = 5;
-      tle.line_1.satellite_number = std::stoi(line_1.substr(pos, n));
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    {
-      constexpr size_t n = 1;
-      tle.line_1.classification = line_1.substr(pos, n)[0];
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    ++pos;  //  a space
-    assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-
-    {
-      constexpr size_t n = 2;
-      tle.line_1.launch_year = std::stoi(line_1.substr(pos, n));
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    {
-      constexpr size_t n = 3;
-      tle.line_1.launch_number = std::stoi(line_1.substr(pos, n));
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    {
-      constexpr size_t n = 3;
-      tle.line_1.launch_piece = line_1.substr(pos, n);
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    ++pos;  //  a space
-    assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-
-    {
-      constexpr size_t n = 2;
-      tle.line_1.epoch_year = std::stoi(line_1.substr(pos, n));
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    {
-      constexpr size_t n = 12;
-      tle.line_1.epoch_day = std::stod(line_1.substr(pos, n));
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    ++pos;  //  a space
-    assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-
-    {
-      constexpr size_t n = 10;
-      tle.line_1.mean_motion_dot = std::stod(line_1.substr(pos, n));
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    ++pos;  //  a space
-    assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-
-    {
-      constexpr size_t n = 8;
-      tle.line_1.mean_motion_ddot = exponent_to_double(line_1.substr(pos, n));
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    ++pos;  //  a space
-    assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-
-    {
-      constexpr size_t n = 8;
-      tle.line_1.bstar_drag = exponent_to_double(line_1.substr(pos, n));
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    ++pos;  //  a space
-    assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-
-    {
-      constexpr size_t n = 1;
-      tle.line_1.ephemeris_type = stoi(line_1.substr(pos, n));
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    ++pos;  //  a space
-    assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-
-    {
-      constexpr size_t n = 4;
-      tle.line_1.element_number = stoi(line_1.substr(pos, n));
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    {
-      constexpr size_t n = 1;
-      tle.line_1.checksum = stoi(line_1.substr(pos, n));
-    }
-
-    pos = 0;  //  reset, moving onto line 2
-
-    {
-      constexpr size_t n = 1;
-      tle.line_2.line_number = std::stoi(line_2.substr(pos, n));
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    ++pos;  //  a space
-    assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-
-    {
-      constexpr size_t n = 5;
-      tle.line_2.satellite_number = std::stoi(line_2.substr(pos, n));
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    ++pos;  //  a space
-    assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-
-    {
-      constexpr size_t n = 8;
-      tle.line_2.inclination = std::stod(line_2.substr(pos, n));
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    ++pos;  //  a space
-    assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-
-    {
-      constexpr size_t n = 8;
-      tle.line_2.raan = std::stod(line_2.substr(pos, n));
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    ++pos;  //  a space
-    assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-
-    {
-      constexpr size_t n = 7;
-      tle.line_2.eccentricity = std::stod("0." + line_2.substr(pos, n));
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    ++pos;  //  a space
-    assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-
-    {
-      constexpr size_t n = 8;
-      tle.line_2.argument_of_perigree = std::stod(line_2.substr(pos, n));
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    ++pos;  //  a space
-    assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-
-    {
-      constexpr size_t n = 8;
-      tle.line_2.mean_anomaly = std::stod(line_2.substr(pos, n));
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    ++pos;  //  a space
-    assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-
-    {
-      constexpr size_t n = 11;
-      tle.line_2.mean_motion = std::stod(line_2.substr(pos, n));
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    {
-      constexpr size_t n = 5;
-      tle.line_2.rev_at_epoch = std::stoi(line_2.substr(pos, n));
-      pos += n;
-      assert(pos < tle_line_size && "ParseTle() position exceeded line size");
-    }
-
-    {
-      constexpr size_t n = 1;
-      tle.line_2.checksum = stoi(line_2.substr(pos, n));
-    }
-
-  } catch (const std::out_of_range &e) {
-    //  "if the converted value would fall out of the range of
-    //   the result type or if the underlying function"
-    auto msg = enrich_msg(fmt::format(
-        R"(std::out_of_range while parsing TLE, msg="{}", tle_str="{}")",
-        e.what(), tle_str));
-    throw EobError(msg);
-  } catch (const std::invalid_argument &e) {
-    auto msg = enrich_msg(fmt::format(
-        R"(std::invalid_argument while parsing TLE, msg="{}", tle_str="{}")",
-        e.what(), tle_str));
-    throw EobError(msg);
   }
 
   // Line 1 parsed value checks
   if (tle.line_1.line_number != 1) {
-    auto msg = enrich_msg(
-        fmt::format(R"(TLE line 1 contains invalid line number, expected={}, )"
-                    R"(value={}, line_1="{}")",
-                    1, tle.line_1.line_number, line_1));
-    throw EobError(msg);
+    throw MyException<std::string>(
+        fmt::format(R"(TLE line 1 contains invalid line number, value="{}")",
+                    tle.line_1.line_number),
+        line_1);
   }
 
   // only unclassified TLEs are in the public domain (that's all we have)
   // access to, so any other character is assumed to be an error
   if (tle.line_1.classification != 'U') {
-    auto msg = enrich_msg(fmt::format(
-        R"(TLE line 1 contains invalid classification, expected={}, )"
-        R"(value={}, line_1="{}")",
-        'U', tle.line_1.classification, line_1));
-    throw EobError(msg);
+    throw MyException<std::string>(
+        fmt::format(
+            R"(TLE line 1 contains invalid line number, value={}, expected="U")",
+            tle.line_1.classification),
+        line_1);
   }
 
   int line_1_computed_checksum = compute_checksum(line_1);
   if (tle.line_1.checksum != line_1_computed_checksum) {
-    auto msg = enrich_msg(
-        fmt::format(R"(TLE line 1 contains invalid checksum, computed={}, )"
-                    R"(value={}, line_1="{}")",
-                    line_1_computed_checksum, tle.line_1.checksum, line_1));
-    throw EobError(msg);
+    throw MyException<std::string>(
+        fmt::format(
+            R"(TLE line 1 contains invalid checksum, parsed={}, computed={})",
+            tle.line_1.checksum, line_1_computed_checksum),
+        line_1);
   }
 
   // Line 2 parsed value checks
   if (tle.line_2.line_number != 2) {
-    auto msg = enrich_msg(
-        fmt::format(R"(TLE line 2 contains invalid line number, expected={}, )"
-                    R"(value={}, line_2="{}")",
-                    2, tle.line_2.line_number, line_2));
-    throw EobError(msg);
+    throw MyException<std::string>(
+        fmt::format(R"(TLE line 2 contains invalid line number, value="{}")",
+                    tle.line_2.line_number),
+        line_2);
   }
 
-  if (auto msg = check_inclusive_domain(tle.line_2.inclination, 0.0, 180.0,
-                                        "inclination")) {
-    throw EobError(*msg);
+  if (auto msg =
+          is_within_inclusive_domain(tle.line_2.inclination, 0.0, 180.0)) {
+    throw MyException<std::string>(
+        fmt::format(R"(TLE line 2 contains invalid inclination {})", *msg),
+        line_2);
   }
 
-  if (auto msg = check_inclusive_domain(tle.line_2.raan, 0.0, 360.0, "RAAN")) {
-    throw EobError(*msg);
+  if (auto msg = is_within_inclusive_domain(tle.line_2.raan, 0.0, 360.0)) {
+    throw MyException<std::string>(
+        fmt::format(R"(TLE line 2 contains invalid RAAN {})", *msg), line_2);
   }
 
-  if (auto msg = check_inclusive_domain(tle.line_2.eccentricity, 0.0, 1.0,
-                                        "eccentricity")) {
-    throw EobError(*msg);
+  if (auto msg =
+          is_within_inclusive_domain(tle.line_2.eccentricity, 0.0, 1.0)) {
+    throw MyException<std::string>(
+        fmt::format(R"(TLE line 2 contains invalid eccentricity {})", *msg),
+        line_2);
   }
 
-  if (auto msg = check_inclusive_domain(tle.line_2.argument_of_perigree, 0.0,
-                                        360.0, "argument_of_perigree")) {
-    throw EobError(*msg);
+  if (auto msg = is_within_inclusive_domain(tle.line_2.argument_of_perigree,
+                                            0.0, 360.0)) {
+    throw MyException<std::string>(
+        fmt::format(R"(TLE line 2 contains invalid argument of perigree {})",
+                    *msg),
+        line_2);
   }
 
-  if (auto msg = check_inclusive_domain(tle.line_2.mean_anomaly, 0.0, 360.0,
-                                        "mean_anomaly")) {
-    throw EobError(*msg);
+  if (auto msg =
+          is_within_inclusive_domain(tle.line_2.mean_anomaly, 0.0, 360.0)) {
+    throw MyException<std::string>(
+        fmt::format(R"(TLE line 2 contains invalid mean anomaly {})", *msg),
+        line_2);
   }
 
   int line_2_computed_checksum = compute_checksum(line_2);
   if (tle.line_2.checksum != line_2_computed_checksum) {
-    auto msg = enrich_msg(
-        fmt::format(R"(TLE line 2 contains invalid checksum, computed={}, )"
-                    R"(value={}, line_2="{}")",
-                    line_2_computed_checksum, tle.line_2.checksum, line_2));
-    throw EobError(msg);
+    throw MyException<std::string>(
+        fmt::format(
+            R"(TLE line 2 contains invalid checksum, parsed={}, computed={})",
+            tle.line_2.checksum, line_2_computed_checksum),
+        line_2);
   }
 
   // consistency checks between the two lines
   if (tle.line_1.satellite_number != tle.line_2.satellite_number) {
-    auto loc = std::source_location::current();
-    auto msg = fmt::format(
-        R"({}:{} parsed satellite numbers don't match between TLE lines, line_1_value={}, line_2_value={})",
-        loc.file_name(), loc.function_name(), tle.line_1.satellite_number,
-        tle.line_2.satellite_number);
-    throw EobError(msg);
+    throw MyException<std::string>(
+        fmt::format(
+            R"(parsed satellite numbers don't match between TLE lines, line_1_value={}, line_2_value={})",
+            tle.line_1.satellite_number, tle.line_2.satellite_number),
+        tle_str);
   }
 
   return tle;
