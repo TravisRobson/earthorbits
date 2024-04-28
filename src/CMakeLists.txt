@@ -3,9 +3,9 @@ add_library(earthorbits earthorbits.cpp)
 # TODO Make this optional
 # https://stackoverflow.com/a/47370726
 # https://cmake.org/cmake/help/latest/module/CheckIPOSupported.html#module:CheckIPOSupported
-include(CheckIPOSupported)
-check_ipo_supported() # fatal error if IPO is not supported
-set_property(TARGET earthorbits PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+# include(CheckIPOSupported)
+# check_ipo_supported() # fatal error if IPO is not supported
+# set_property(TARGET earthorbits PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 # To build the target we need headers from both locations.
 # Public headers live in include. Users of this library only need to
