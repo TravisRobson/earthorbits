@@ -5,12 +5,30 @@
 
 #include "earthorbits/earthorbits.h"
 
+using namespace eob;
+
+TEST(EarthorbitTest, MyException) {
+  auto foo = []() { throw MyException<int>("foo failed", 1); };
+  auto bar = [foo]() {
+    try {
+      foo();
+    } catch (MyException<int> &e) {
+      std::cout << "where=" << e.where() << ", what=" << e.what()
+                << ", data=" << e.data() << '\n';
+      e.what() += "here is some extra info!";
+      throw;
+    };
+  };
+
+  ASSERT_THROW(bar(), MyException<int>);
+}
+
 TEST(EarthorbitTest, ParseTLES) {
   {
     std::string s =
         R"(1 25544U 98067A   24097.81509284  .00011771  00000-0  21418-3 0  9995
 2 25544  51.6405 309.2692 0004792  43.0163  63.5300 15.49960977447473)";
-    auto tle = eob::ParseTle(s);
+    auto tle = ParseTle(s);
     std::cout << tle << "\n";
 
     ASSERT_EQ(tle.line_1.line_number, 1);
@@ -46,7 +64,7 @@ TEST(EarthorbitTest, ParseTLES) {
     std::string s =
         R"(1 25544U 98067A   24104.84924656  .00014577  00000-0  26139-3 0  9993
 2 25544  51.6399 274.4116 0004733  65.7744  78.8036 15.50162147448561)";
-    auto tle = eob::ParseTle(s);
+    auto tle = ParseTle(s);
     std::cout << tle << "\n";
 
     ASSERT_EQ(tle.line_1.line_number, 1);
@@ -82,7 +100,7 @@ TEST(EarthorbitTest, ParseTLES) {
     std::string s =
         R"(1 25544U 98067A   08264.51782528 -.00002182  00000-0 -11606-4 0  2927
 2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.72125391563537)";
-    auto tle = eob::ParseTle(s);
+    auto tle = ParseTle(s);
     std::cout << tle << "\n";
 
     ASSERT_EQ(tle.line_1.line_number, 1);
@@ -119,20 +137,39 @@ TEST(EarthorbitTest, ParseInvalidTLES) {
         R"(1 25544U 98067A   24097.81509284  .00011771  00000-0  21418-3 0  9995
 2 25544  51.6405 309.2692 0004792  43.0163  63.5300 15.4996097744747)";
 
-    ASSERT_THROW(eob::ParseTle(s), eob::EobError);
+    ASSERT_THROW(auto tle = ParseTle(s), MyException<std::string>);
   }
 
   {  // expect linebreak precondition, replaced with space
     std::string s =
         R"(1 25544U 98067A   24097.81509284  .00011771  00000-0  21418-3 0  9995 2 25544  51.6405 309.2692 0004792  43.0163  63.5300 15.49960977447473)";
 
-    ASSERT_THROW(eob::ParseTle(s), eob::EobError);
+    ASSERT_THROW(auto tle = ParseTle(s), MyException<std::string>);
   }
 
-  {  // expect linebreak precondition, replaced with space
+  {  // Invalid character, Replaced the A in 98067A with a lowercase a
     std::string s =
-        R"(1 25544U 98067A   24097.81509284  .00011771  00000-0  21418-3 0  9995 2 25544  51.6405 309.2692 0004792  43.0163  63.5300 15.49960977447473)";
+        R"(1 25544U 98067a   24097.81509284  .00011771  00000-0  21418-3 0  9995
+2 25544  51.6405 309.2692 0004792  43.0163  63.5300 15.49960977447473)";
 
-    ASSERT_THROW(eob::ParseTle(s), eob::EobError);
+    ASSERT_THROW(auto tle = ParseTle(s), MyException<std::string>);
   }
+
+  /// TODO(tjr) guess there is a lot more to do if I want a truly robust
+  /// function. std::stoi is very forgiving.
+  //   { // Invalid days in line 1, two decimals
+  //     std::string s =
+  //         R"(1 25544U 98067A   24097.815.9284  .00011771  00000-0  21418-3 0
+  //         9995
+  // 2 25544  51.6405 309.2692 0004792  43.0163  63.5300 15.49960977447473)";
+
+  //     try {
+  //       auto tle = ParseTle(s);
+  //       std::cout << tle.line_1.epoch_day << "\n";
+  //     } catch (MyException<std::string> &e) {
+  //       std::cout << e.what() << ",where=" << e.where() << "data=" <<
+  //       e.data() << "\n";
+  //     }
+  //     ASSERT_THROW(auto tle = ParseTle(s), MyException<std::string>);
+  //   }
 }
