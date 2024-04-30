@@ -1,7 +1,9 @@
 include(AddGoogleTest)
 
+include(AddDate)
+
 add_executable(earthorbittests main.cpp)
-target_link_libraries(earthorbittests PUBLIC GTest::gtest_main earthorbits)
+target_link_libraries(earthorbittests PUBLIC GTest::gtest_main earthorbits date date-tz)
 target_compile_options(earthorbittests PUBLIC 
     ${EARTHORBIT_PRIVATE_COMPILE_OPTIONS}
 )
@@ -25,7 +27,7 @@ include(GoogleTest)
 gtest_discover_tests(earthorbittests)
 
 # It doesn't make sense to benchmark in debug mode
-if (CMAKE_BUILD_TYPE EQUAL Release)
+if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
     include(AddGoogleBenchmark)
 
     add_executable(benchmarksearthorbit benchmarks.cpp)

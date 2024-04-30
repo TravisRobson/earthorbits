@@ -3,7 +3,10 @@
 #include <iostream>
 #include <string>
 
+#include "date/date.h"
+#include "date/tz.h"
 #include "earthorbits/earthorbits.h"
+#include "earthorbits/parsetle.h"
 
 using namespace eob;
 
@@ -172,4 +175,14 @@ TEST(EarthorbitTest, ParseInvalidTLES) {
   //     }
   //     ASSERT_THROW(auto tle = ParseTle(s), MyException<std::string>);
   //   }
+}
+
+TEST(DateTest, Examples) {
+  using namespace date;
+
+  auto ymd = 2015_y / date::sep / 25;
+  std::cout << "year=" << ymd.year() << '\n';
+
+  auto t = make_zoned(current_zone(), std::chrono::system_clock::now());
+  std::cout << t << '\n';
 }

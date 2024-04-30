@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "earthorbits/earthorbits.h"
+#include "earthorbits/parsetle.h"
 
 struct KeyValue {
   std::string key;
