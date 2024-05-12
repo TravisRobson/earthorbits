@@ -2,6 +2,9 @@
 
 #include <fmt/core.h>
 
+#include <chrono>
+#include <ctime>
+
 #include "constants.h"
 #include "date/date.h"
 #include "eobmath.h"
@@ -60,9 +63,17 @@ namespace {
     const std::chrono::time_point<std::chrono::system_clock> &tp) {
   using namespace std::chrono;
 
-  std::array<char, std::size("yyyy-mm-ddTHH:MM:SS")> ymd_hms;
+  std::array<char, std::size("yyyy-mm-ddTHH:MM:SS")> ymd_hms{};
   auto tc = system_clock::to_time_t(tp);
-  std::strftime(ymd_hms.data(), ymd_hms.size(), "%FT%T", std::gmtime(&tc));
+  auto sz =
+      std::strftime(ymd_hms.data(), ymd_hms.size(), "%FT%T", std::gmtime(&tc));
+  if (sz == 0) {
+    throw MyException<decltype(tp)>(
+        fmt::format(
+            R"(failed to format std::chrono::time_point with std::strftime, result="{}")",
+            ymd_hms),
+        tp);
+  }
   auto ms = duration_cast<milliseconds>(tp.time_since_epoch()).count() % 1000;
   return fmt::format("{}.{:03d}Z", ymd_hms.data(), ms);
 }
