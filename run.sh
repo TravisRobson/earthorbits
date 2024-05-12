@@ -27,5 +27,5 @@ cmake -S . -B build-cmake-release \
     -DBENCHMARK_ENABLE_LTO=true
 cmake --build build-cmake-release -j 6
 
-./build-cmake-release/tests/earthorbittests --gtest_filter=SiderealTest*
+./build-cmake-release/tests/earthorbittests --gtest_filter=TimeTests*
 ./build-cmake-release/tests/benchmarksearthorbit 

@@ -1,11 +1,11 @@
 #include "earthorbits/parsetle.h"
 
-#include <assert.h>
 #include <fmt/core.h>
 #include <fmt/ostream.h>
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cctype>
 #include <cstddef>
 #include <functional>

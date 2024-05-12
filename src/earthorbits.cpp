@@ -42,7 +42,7 @@ namespace {
   using namespace std::chrono;
 
   constexpr system_clock::time_point T0 =
-      sys_days(2000_y / date::jan / 1) + 12h;
+      date::sys_days(2000_y / date::jan / 1) + 12h;
   std::chrono::duration<double, std::chrono::days::period> delta_days =
       (tp - T0);
 

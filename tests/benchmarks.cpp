@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "date/date.h"
 #include "earthorbits/earthorbits.h"
 #include "earthorbits/parsetle.h"
 
@@ -92,6 +93,18 @@ static void BM_CalcGMST(benchmark::State& state) {
   auto now = std::chrono::system_clock::now();
   for (auto _ : state) {
     auto gmst = calc_gmst(now);
+  }
+}
+BENCHMARK(BM_CalcGMST);
+
+static void BM_TimePointToString(benchmark::State& state) {
+  using namespace date;
+  using namespace std::chrono;
+  constexpr system_clock::time_point tp =
+      sys_days{date::May / 12 / 2024} + 20h + 33min + 5s;
+
+  for (auto _ : state) {
+    auto str = to_string(tp);
   }
 }
 BENCHMARK(BM_CalcGMST);

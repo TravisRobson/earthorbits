@@ -177,11 +177,21 @@ TEST(EarthorbitTest, ParseInvalidTLES) {
   //   }
 }
 
+TEST(TimeTests, ToString) {
+  using namespace date;
+  using namespace std::chrono;
+  constexpr system_clock::time_point tp =
+      sys_days{date::May / 12 / 2024} + 20h + 33min + 5s;
+
+  auto str = to_string(tp);
+  EXPECT_EQ(str, "2024-05-12T20:33:05.000Z");
+}
+
 /// @brief Validate greenwich sidereal times
 ///
 /// Answers have been verifies using:
 /// @see https://aa.usno.navy.mil/data/JulianDate
-TEST(SiderealTest, GreenwichMeanTimes) {
+TEST(TimeTests, GreenwichMeanTimes) {
   using namespace date;
   using namespace std::chrono;
 
