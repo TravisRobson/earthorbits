@@ -5,7 +5,11 @@
 #include <unordered_map>
 #include <vector>
 
+#include "date/date.h"
 #include "earthorbits/earthorbits.h"
+#include "earthorbits/parsetle.h"
+
+using namespace eob;
 
 struct KeyValue {
   std::string key;
@@ -45,7 +49,7 @@ static void BM_MyMap(benchmark::State& state) {
   }
 }
 // Register the function as a benchmark
-BENCHMARK(BM_MyMap);
+// BENCHMARK(BM_MyMap);
 
 static void BM_StdUnorderedMap(benchmark::State& state) {
   // Code before the loop is not measured
@@ -59,7 +63,7 @@ static void BM_StdUnorderedMap(benchmark::State& state) {
     std_map["gfagasd"];
   }
 }
-BENCHMARK(BM_StdUnorderedMap);
+// BENCHMARK(BM_StdUnorderedMap);
 
 static void BM_StdMap(benchmark::State& state) {
   std::map<std::string, int> std_map{
@@ -72,7 +76,7 @@ static void BM_StdMap(benchmark::State& state) {
     std_map["gfagasd"];
   }
 }
-BENCHMARK(BM_StdMap);
+// BENCHMARK(BM_StdMap);
 
 static void BM_ParseTles(benchmark::State& state) {
   std::string s =
@@ -80,9 +84,29 @@ static void BM_ParseTles(benchmark::State& state) {
 2 25544  51.6405 309.2692 0004792  43.0163  63.5300 15.49960977447473)";
 
   for (auto _ : state) {
-    auto tle = eob::ParseTle(s);
+    auto tle = ParseTle(s);
   }
 }
 BENCHMARK(BM_ParseTles);
+
+static void BM_CalcGMST(benchmark::State& state) {
+  auto now = std::chrono::system_clock::now();
+  for (auto _ : state) {
+    auto gmst = calc_gmst(now);
+  }
+}
+BENCHMARK(BM_CalcGMST);
+
+static void BM_TimePointToString(benchmark::State& state) {
+  using namespace date;
+  using namespace std::chrono;
+  constexpr system_clock::time_point tp =
+      date::sys_days{date::May / 12 / 2024} + 20h + 33min + 5s;
+
+  for (auto _ : state) {
+    auto str = to_string(tp);
+  }
+}
+BENCHMARK(BM_CalcGMST);
 
 BENCHMARK_MAIN();

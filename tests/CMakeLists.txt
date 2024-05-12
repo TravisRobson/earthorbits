@@ -1,7 +1,8 @@
 include(AddGoogleTest)
+include(AddDate)
 
 add_executable(earthorbittests main.cpp)
-target_link_libraries(earthorbittests PUBLIC GTest::gtest_main earthorbits)
+target_link_libraries(earthorbittests PUBLIC GTest::gtest_main earthorbits date fmt::fmt)
 target_compile_options(earthorbittests PUBLIC 
     ${EARTHORBIT_PRIVATE_COMPILE_OPTIONS}
 )
@@ -12,7 +13,12 @@ target_include_directories(earthorbittests
         $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
 )
-
+# Prevent clang-tidy from checking date headers
+# https://davy.ai/ignore-3rd-party-headers-from-clang-tidy-in-cmake/
+target_include_directories(earthorbittests 
+    SYSTEM PUBLIC 
+        ${CMAKE_BINARY_DIR}/_deps/date-src/include/
+)
 if (EOB_ENABLE_CLANG_TIDY)
     # https://cmake.org/pipermail/cmake/2018-December/068739.html
     set_target_properties(earthorbittests
@@ -25,11 +31,11 @@ include(GoogleTest)
 gtest_discover_tests(earthorbittests)
 
 # It doesn't make sense to benchmark in debug mode
-if (CMAKE_BUILD_TYPE EQUAL Release)
+if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
     include(AddGoogleBenchmark)
 
     add_executable(benchmarksearthorbit benchmarks.cpp)
-    target_link_libraries(benchmarksearthorbit PUBLIC benchmark::benchmark earthorbits)
+    target_link_libraries(benchmarksearthorbit PUBLIC benchmark::benchmark earthorbits date)
     target_compile_options(benchmarksearthorbit PUBLIC 
         ${EARTHORBIT_PRIVATE_COMPILE_OPTIONS}
     )
@@ -39,6 +45,12 @@ if (CMAKE_BUILD_TYPE EQUAL Release)
         PUBLIC
             $<INSTALL_INTERFACE:include>
             $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+    )
+    # Prevent clang-tidy from checking date headers
+    # https://davy.ai/ignore-3rd-party-headers-from-clang-tidy-in-cmake/
+    target_include_directories(benchmarksearthorbit 
+        SYSTEM PUBLIC 
+            ${CMAKE_BINARY_DIR}/_deps/date-src/include/
     )
 
     if (EOB_ENABLE_CLANG_TIDY)

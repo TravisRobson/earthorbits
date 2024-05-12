@@ -12,8 +12,13 @@ Checks: "*,
          -modernize-use-trailing-return-type,
          -readability-identifier-length,
          -misc-const-correctness,
+         -hicpp-exception-baseclass,
+         -readability-magic-numbers,
+         -cppcoreguidelines-avoid-magic-numbers,
 "
 WarningsAsErrors: true
 HeaderFilterRegex: ''
 UseColor: true
-IgnoredFloatingPointValues: "10.0,0.0,360.0,180.0"
+CheckOptions:
+  - key:   readability-magic-numbers.IgnoredFloatingPointValues
+    value: '0.0;1.0;10.0;360.0;180.0'

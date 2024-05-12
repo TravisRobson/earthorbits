@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.25)
 
 project(earthorbits VERSION 0.1.0 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+
+message(STATUS "${CMAKE_PREFIX_PATH}")
 
 option(EOB_ENABLE_CLANG_TIDY "Enable clang-tidy checks when compiling" OFF)
 # Below used so that local develop isn't made more annoying, but 
@@ -13,6 +15,8 @@ option(EOB_COMPILE_SANITIZERS "Compile with clang sanitizers" OFF)
 message(STATUS "::EARTHORBITS:: EOB_ENABLE_CLANG_TIDY=${EOB_ENABLE_CLANG_TIDY}")
 message(STATUS "::EARTHORBITS:: EOB_COMPILE_WARNINGS_AS_ERRORS=${EOB_COMPILE_WARNINGS_AS_ERRORS}")
 message(STATUS "::EARTHORBITS:: EOB_COMPILE_SANITIZERS=${EOB_COMPILE_SANITIZERS}")
+
+set(FETCHCONTENT_QUIET OFF)
 
 if (EOB_ENABLE_CLANG_TIDY)
     find_program(CLANG_TIDY clang-tidy)

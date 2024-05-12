@@ -1,9 +1,12 @@
 #include <gtest/gtest.h>
 
+#include <chrono>
 #include <iostream>
 #include <string>
 
+#include "date/date.h"
 #include "earthorbits/earthorbits.h"
+#include "earthorbits/parsetle.h"
 
 using namespace eob;
 
@@ -172,4 +175,55 @@ TEST(EarthorbitTest, ParseInvalidTLES) {
   //     }
   //     ASSERT_THROW(auto tle = ParseTle(s), MyException<std::string>);
   //   }
+}
+
+TEST(TimeTests, ToString) {
+  using namespace date;
+  using namespace std::chrono;
+  constexpr system_clock::time_point tp =
+      date::sys_days{date::May / 12 / 2024} + 20h + 33min + 5s;
+
+  auto str = to_string(tp);
+  EXPECT_EQ(str, "2024-05-12T20:33:05.000Z");
+}
+
+/// @brief Validate greenwich sidereal times
+///
+/// Answers have been verifies using:
+/// @see https://aa.usno.navy.mil/data/JulianDate
+TEST(TimeTests, GreenwichMeanTimes) {
+  using namespace date;
+  using namespace std::chrono;
+
+  constexpr auto tolerance_s = eob_seconds{0.01};
+
+  {
+    constexpr system_clock::time_point tp =
+        date::sys_days{date::May / 10 / 2024};
+    auto gmst = calc_gmst(tp);
+
+    // 15:13:08.8256
+    auto expected = eob_seconds{15 * 3600 + 13 * 60 + 08.8256};
+    EXPECT_NEAR(gmst.count(), expected.count(), tolerance_s.count());
+  }
+
+  {
+    constexpr system_clock::time_point tp =
+        date::sys_days{date::May / 10 / 2024} + 2h + 26min;
+    auto gmst = calc_gmst(tp);
+
+    // 17:39:32.8097
+    auto expected = eob_seconds{17 * 3600 + 39 * 60 + 32.8097};
+    EXPECT_NEAR(gmst.count(), expected.count(), tolerance_s.count());
+  }
+
+  {
+    constexpr system_clock::time_point tp =
+        date::sys_days{date::May / 12 / 2024} + 20h + 33min + 5s;
+    auto gmst = calc_gmst(tp);
+
+    // 11:57:29.5006
+    auto expected = eob_seconds{11 * 3600 + 57 * 60 + 29.5006};
+    EXPECT_NEAR(gmst.count(), expected.count(), tolerance_s.count());
+  }
 }

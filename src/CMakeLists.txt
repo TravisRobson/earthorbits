@@ -1,4 +1,7 @@
-add_library(earthorbits earthorbits.cpp)
+include(AddFmt)
+include(AddDate)
+
+add_library(earthorbits earthorbits.cpp parsetle.cpp)
 
 # TODO Make this optional
 # https://stackoverflow.com/a/47370726
@@ -23,7 +26,11 @@ target_include_directories(earthorbits
 
 # Prevent clang-tidy from checking fmt headers
 # https://davy.ai/ignore-3rd-party-headers-from-clang-tidy-in-cmake/
-target_include_directories(earthorbits SYSTEM PUBLIC ${CMAKE_BINARY_DIR}/_deps/fmt-src/include/)
+target_include_directories(earthorbits 
+    SYSTEM PUBLIC 
+        ${CMAKE_BINARY_DIR}/_deps/fmt-src/include/
+        ${CMAKE_BINARY_DIR}/_deps/date-src/include/
+)
 
 # https://github.com/cpp-best-practices/cppbestpractices/blob/master/02-Use_the_Tools_Available.md#compilers
 target_compile_options(earthorbits 
@@ -33,8 +40,7 @@ target_compile_options(earthorbits
 target_compile_definitions(earthorbits PRIVATE ${EARTHORIBTS_PRIVATE_COMPILE_DEFINES})
 
 target_compile_features(earthorbits PRIVATE cxx_std_20)
-include(AddFmt)
-target_link_libraries(earthorbits PRIVATE fmt::fmt)
+target_link_libraries(earthorbits PRIVATE fmt::fmt date)
 
 if (EOB_ENABLE_CLANG_TIDY)
     # https://cmake.org/pipermail/cmake/2018-December/068739.html
