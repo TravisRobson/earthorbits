@@ -7,11 +7,13 @@
 #include <array>
 #include <cassert>
 #include <cctype>
+#include <cmath>
 #include <cstddef>
 #include <functional>
 #include <limits>
 #include <optional>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 

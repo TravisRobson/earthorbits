@@ -101,7 +101,7 @@ static void BM_TimePointToString(benchmark::State& state) {
   using namespace date;
   using namespace std::chrono;
   constexpr system_clock::time_point tp =
-      sys_days{date::May / 12 / 2024} + 20h + 33min + 5s;
+      date::sys_days{date::May / 12 / 2024} + 20h + 33min + 5s;
 
   for (auto _ : state) {
     auto str = to_string(tp);

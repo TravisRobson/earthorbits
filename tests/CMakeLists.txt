@@ -13,7 +13,12 @@ target_include_directories(earthorbittests
         $<INSTALL_INTERFACE:include>
         $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
 )
-
+# Prevent clang-tidy from checking date headers
+# https://davy.ai/ignore-3rd-party-headers-from-clang-tidy-in-cmake/
+target_include_directories(earthorbittests 
+    SYSTEM PUBLIC 
+        ${CMAKE_BINARY_DIR}/_deps/date-src/include/
+)
 if (EOB_ENABLE_CLANG_TIDY)
     # https://cmake.org/pipermail/cmake/2018-December/068739.html
     set_target_properties(earthorbittests
@@ -40,6 +45,12 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
         PUBLIC
             $<INSTALL_INTERFACE:include>
             $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include>
+    )
+    # Prevent clang-tidy from checking date headers
+    # https://davy.ai/ignore-3rd-party-headers-from-clang-tidy-in-cmake/
+    target_include_directories(benchmarksearthorbit 
+        SYSTEM PUBLIC 
+            ${CMAKE_BINARY_DIR}/_deps/date-src/include/
     )
 
     if (EOB_ENABLE_CLANG_TIDY)
