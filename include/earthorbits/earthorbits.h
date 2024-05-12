@@ -4,6 +4,7 @@
 #include <iostream>
 #include <source_location>
 #include <stdexcept>
+#include <string>
 
 namespace eob {
 inline std::ostream &operator<<(std::ostream &os,

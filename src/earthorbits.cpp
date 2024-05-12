@@ -4,6 +4,7 @@
 
 #include <chrono>
 #include <ctime>
+#include <string>
 
 #include "constants.h"
 #include "date/date.h"
@@ -70,8 +71,7 @@ namespace {
   if (sz == 0) {
     throw MyException<decltype(tp)>(
         fmt::format(
-            R"(failed to format std::chrono::time_point with std::strftime, result="{}")",
-            ymd_hms),
+            R"(failed to format std::chrono::time_point with std::strftime)"),
         tp);
   }
   auto ms = duration_cast<milliseconds>(tp.time_since_epoch()).count() % 1000;
