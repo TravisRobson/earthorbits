@@ -181,7 +181,7 @@ TEST(TimeTests, ToString) {
   using namespace date;
   using namespace std::chrono;
   constexpr system_clock::time_point tp =
-      sys_days{date::May / 12 / 2024} + 20h + 33min + 5s;
+      date::sys_days{date::May / 12 / 2024} + 20h + 33min + 5s;
 
   auto str = to_string(tp);
   EXPECT_EQ(str, "2024-05-12T20:33:05.000Z");
@@ -198,7 +198,8 @@ TEST(TimeTests, GreenwichMeanTimes) {
   constexpr auto tolerance_s = eob_seconds{0.01};
 
   {
-    constexpr system_clock::time_point tp = sys_days{date::May / 10 / 2024};
+    constexpr system_clock::time_point tp =
+        date::sys_days{date::May / 10 / 2024};
     auto gmst = calc_gmst(tp);
 
     // 15:13:08.8256
@@ -208,7 +209,7 @@ TEST(TimeTests, GreenwichMeanTimes) {
 
   {
     constexpr system_clock::time_point tp =
-        sys_days{date::May / 10 / 2024} + 2h + 26min;
+        date::sys_days{date::May / 10 / 2024} + 2h + 26min;
     auto gmst = calc_gmst(tp);
 
     // 17:39:32.8097
@@ -218,7 +219,7 @@ TEST(TimeTests, GreenwichMeanTimes) {
 
   {
     constexpr system_clock::time_point tp =
-        sys_days{date::May / 12 / 2024} + 20h + 33min + 5s;
+        date::sys_days{date::May / 12 / 2024} + 20h + 33min + 5s;
     auto gmst = calc_gmst(tp);
 
     // 11:57:29.5006
