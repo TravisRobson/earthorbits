@@ -40,7 +40,8 @@ constexpr std::string_view tle_valid_chars =
 constexpr auto max_char_as_int =
     safe_int_to_size_t(std::numeric_limits<char>::max());
 
-constexpr std::array<bool, max_char_as_int> get_valid_tle_char_mask() {
+[[nodiscard]] constexpr std::array<bool, max_char_as_int>
+get_valid_tle_char_mask() {
   std::array<bool, max_char_as_int> mask{};  // initialize all to false
   // mark valid characters as true
   for (char c : tle_valid_chars) {

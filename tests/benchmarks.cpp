@@ -1,5 +1,8 @@
 #include <benchmark/benchmark.h>
 
+// #include "date/tz.h"
+// #include "date/julian.h"
+
 #include <map>
 #include <string>
 #include <unordered_map>
@@ -46,7 +49,7 @@ static void BM_MyMap(benchmark::State& state) {
   }
 }
 // Register the function as a benchmark
-BENCHMARK(BM_MyMap);
+// BENCHMARK(BM_MyMap);
 
 static void BM_StdUnorderedMap(benchmark::State& state) {
   // Code before the loop is not measured
@@ -60,7 +63,7 @@ static void BM_StdUnorderedMap(benchmark::State& state) {
     std_map["gfagasd"];
   }
 }
-BENCHMARK(BM_StdUnorderedMap);
+// BENCHMARK(BM_StdUnorderedMap);
 
 static void BM_StdMap(benchmark::State& state) {
   std::map<std::string, int> std_map{
@@ -73,7 +76,7 @@ static void BM_StdMap(benchmark::State& state) {
     std_map["gfagasd"];
   }
 }
-BENCHMARK(BM_StdMap);
+// BENCHMARK(BM_StdMap);
 
 static void BM_ParseTles(benchmark::State& state) {
   std::string s =
@@ -85,5 +88,17 @@ static void BM_ParseTles(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_ParseTles);
+
+// static void BM_JulianTimeNow(benchmark::State& state) {
+//   auto tz = date::current_zone();
+//   for (auto _ : state) {
+//     auto zt = date::make_zoned(tz, std::chrono::system_clock::now());
+//     auto lt = zt.get_local_time();
+//     auto ld = date::floor<date::days>(lt);
+//     julian::year_month_day ymd{ld};
+//     auto time = date::make_time(lt - ld);
+//   }
+// }
+// BENCHMARK(BM_JulianTimeNow);
 
 BENCHMARK_MAIN();

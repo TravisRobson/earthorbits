@@ -12,6 +12,12 @@ set -o errexit
 # ./build-cmake-debug/tests/earthorbittests
 # lldb -- ./build-cmake-debug/tests/earthorbittests
 
+    # -DCMAKE_C_COMPILER=/opt/homebrew/opt/llvm/bin/clang \
+    # -DCMAKE_CXX_COMPILER=/opt/homebrew/opt/llvm/bin/clang++ \
+    # -DLLVMAR_EXECUTABLE=/usr/bin/ar \
+    # -DLLVMNM_EXECUTABLE=/opt/homebrew/opt/llvm/bin/llvm-nm \
+    # -DLLVMRANLIB_EXECUTABLE=/opt/homebrew/opt/llvm/bin/llvm-ranlib \
+
 mkdir -p build-cmake-release
 cmake -S . -B build-cmake-release \
     -DCMAKE_BUILD_TYPE=Release \
@@ -20,6 +26,8 @@ cmake -S . -B build-cmake-release \
     -DEOB_COMPILE_WARNINGS_AS_ERRORS=OFF \
     -DBENCHMARK_ENABLE_LTO=true
 cmake --build build-cmake-release -j 6
-# ./build-cmake-release/tests/benchmarksearthorbit
-# ./build-cmake-release/tests/earthorbittests
-./build-cmake-release/tests/earthorbittests --gtest_filter=DateTest*
+
+./build-cmake-release/tests/earthorbittests --gtest_filter=SiderealTest*
+
+# ./build-cmake-release/tests/earthorbittests --gtest_filter=DateTest*
+# ./build-cmake-release/tests/benchmarksearthorbit 

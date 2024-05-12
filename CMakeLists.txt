@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.25)
 
 project(earthorbits VERSION 0.1.0 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+
+message(STATUS "${CMAKE_PREFIX_PATH}")
 
 option(EOB_ENABLE_CLANG_TIDY "Enable clang-tidy checks when compiling" OFF)
 # Below used so that local develop isn't made more annoying, but 

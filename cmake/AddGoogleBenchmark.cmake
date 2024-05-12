@@ -4,6 +4,8 @@ FetchContent_Declare(
     URL https://github.com/google/benchmark/archive/refs/tags/v1.8.3.zip
 )
 
-set(BENCHMARK_ENABLE_TESTING OFF)
+# SET(HAVE_STD_REGEX CACHE BOOL ON)
+# SET(RUN_HAVE_STD_REGEX CACHE BOOL ON)
+set(BENCHMARK_ENABLE_TESTING CACHE BOOL OFF)
 
 FetchContent_MakeAvailable(googlebenchmark)

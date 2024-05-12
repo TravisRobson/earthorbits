@@ -1,3 +1,6 @@
+include(AddFmt)
+include(AddDate)
+
 add_library(earthorbits earthorbits.cpp parsetle.cpp)
 
 # TODO Make this optional
@@ -33,9 +36,7 @@ target_compile_options(earthorbits
 target_compile_definitions(earthorbits PRIVATE ${EARTHORIBTS_PRIVATE_COMPILE_DEFINES})
 
 target_compile_features(earthorbits PRIVATE cxx_std_20)
-include(AddFmt)
-include(AddDate)
-target_link_libraries(earthorbits PRIVATE fmt::fmt date date-tz)
+target_link_libraries(earthorbits PRIVATE fmt::fmt date) # date-tz)
 
 if (EOB_ENABLE_CLANG_TIDY)
     # https://cmake.org/pipermail/cmake/2018-December/068739.html

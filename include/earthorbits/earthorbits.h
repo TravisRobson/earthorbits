@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <iostream>
 #include <source_location>
 #include <stdexcept>
@@ -30,5 +31,12 @@ class MyException {
   std::source_location location_;
 };
 
-void foobar();
+[[nodiscard]] std::string to_string(
+    const std::chrono::time_point<std::chrono::system_clock> &tp);
+
+/// @brief Compute sidereal time, greenwich mean sidereal time
+/// @see https://celestrak.org/columns/v02n02/
+/// @return seconds, wrapped to 86400 seconds
+[[nodiscard]] double calc_gmst(
+    const std::chrono::time_point<std::chrono::system_clock> &tp) noexcept;
 }  // namespace eob

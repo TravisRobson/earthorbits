@@ -4,6 +4,9 @@
 #include <string>
 
 namespace eob {
+/// TODO there likely is a more memory efficient way of defining these
+///   TLE line structs
+
 /// @see https://celestrak.org/columns/v04n03/
 struct TleLine1 {
   int line_number;
@@ -40,6 +43,9 @@ struct TleLine2 {
 ///
 /// @see https://en.wikipedia.org/wiki/Two-line_element_set
 /// @see https://celestrak.org/columns/v04n03/index.php#FAQ01
+///
+/// TODO argueable there is an invariant now, these data can't
+///   vary independently
 struct Tle {
   TleLine1 line_1;
   TleLine2 line_2;
