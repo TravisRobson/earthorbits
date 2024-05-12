@@ -16,4 +16,5 @@ Checks: "*,
 WarningsAsErrors: true
 HeaderFilterRegex: ''
 UseColor: true
-IgnoredFloatingPointValues: "10.0,0.0,360.0,180.0"
+CheckOptions:
+  readability-magic-numbers.IgnoredFloatingPointValues: "10.0,0.0,360.0,180.0"

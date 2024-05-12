@@ -34,9 +34,13 @@ class MyException {
 [[nodiscard]] std::string to_string(
     const std::chrono::time_point<std::chrono::system_clock> &tp);
 
+/// TODO Need to decide on the actual tpye I want here, it will be
+///   used in coordinate transformations mostly, however, it is a time
+using eob_seconds = std::chrono::duration<double, std::chrono::seconds::period>;
+
 /// @brief Compute sidereal time, greenwich mean sidereal time
 /// @see https://celestrak.org/columns/v02n02/
 /// @return seconds, wrapped to 86400 seconds
-[[nodiscard]] double calc_gmst(
+[[nodiscard]] eob_seconds calc_gmst(
     const std::chrono::time_point<std::chrono::system_clock> &tp) noexcept;
 }  // namespace eob

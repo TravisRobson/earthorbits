@@ -2,7 +2,7 @@ include(AddGoogleTest)
 include(AddDate)
 
 add_executable(earthorbittests main.cpp)
-target_link_libraries(earthorbittests PUBLIC GTest::gtest_main earthorbits date fmt::fmt) # date-tz)
+target_link_libraries(earthorbittests PUBLIC GTest::gtest_main earthorbits date fmt::fmt)
 target_compile_options(earthorbittests PUBLIC 
     ${EARTHORBIT_PRIVATE_COMPILE_OPTIONS}
 )
@@ -30,7 +30,7 @@ if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
     include(AddGoogleBenchmark)
 
     add_executable(benchmarksearthorbit benchmarks.cpp)
-    target_link_libraries(benchmarksearthorbit PUBLIC benchmark::benchmark earthorbits date) # date-tz)
+    target_link_libraries(benchmarksearthorbit PUBLIC benchmark::benchmark earthorbits date)
     target_compile_options(benchmarksearthorbit PUBLIC 
         ${EARTHORBIT_PRIVATE_COMPILE_OPTIONS}
     )

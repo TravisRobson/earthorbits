@@ -185,34 +185,34 @@ TEST(SiderealTest, GreenwichMeanTimes) {
   using namespace date;
   using namespace std::chrono;
 
-  constexpr double tolerance_s = 0.01;
+  constexpr auto tolerance_s = eob_seconds{0.01};
 
   {
     constexpr system_clock::time_point tp = sys_days{date::May / 10 / 2024};
-    double gmst = calc_gmst(tp);
+    auto gmst = calc_gmst(tp);
 
     // 15:13:08.8256
-    double expected = 15 * 3600 + 13 * 60 + 08.8256;
-    EXPECT_NEAR(gmst, expected, tolerance_s);
+    auto expected = eob_seconds{15 * 3600 + 13 * 60 + 08.8256};
+    EXPECT_NEAR(gmst.count(), expected.count(), tolerance_s.count());
   }
 
   {
     constexpr system_clock::time_point tp =
-        sys_days{date::May / 10 / 2024} + 2h + 26min;  // + 34s;
-    double gmst = calc_gmst(tp);
+        sys_days{date::May / 10 / 2024} + 2h + 26min;
+    auto gmst = calc_gmst(tp);
 
     // 17:39:32.8097
-    double expected = 17 * 3600 + 39 * 60 + 32.8097;
-    EXPECT_NEAR(gmst, expected, tolerance_s);
+    auto expected = eob_seconds{17 * 3600 + 39 * 60 + 32.8097};
+    EXPECT_NEAR(gmst.count(), expected.count(), tolerance_s.count());
   }
 
   {
     constexpr system_clock::time_point tp =
         sys_days{date::May / 12 / 2024} + 20h + 33min + 5s;
-    double gmst = calc_gmst(tp);
+    auto gmst = calc_gmst(tp);
 
     // 11:57:29.5006
-    double expected = 11 * 3600 + 57 * 60 + 29.5006;
-    EXPECT_NEAR(gmst, expected, tolerance_s);
+    auto expected = eob_seconds{11 * 3600 + 57 * 60 + 29.5006};
+    EXPECT_NEAR(gmst.count(), expected.count(), tolerance_s.count());
   }
 }

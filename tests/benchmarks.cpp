@@ -1,8 +1,5 @@
 #include <benchmark/benchmark.h>
 
-// #include "date/tz.h"
-// #include "date/julian.h"
-
 #include <map>
 #include <string>
 #include <unordered_map>
@@ -10,6 +7,8 @@
 
 #include "earthorbits/earthorbits.h"
 #include "earthorbits/parsetle.h"
+
+using namespace eob;
 
 struct KeyValue {
   std::string key;
@@ -84,21 +83,17 @@ static void BM_ParseTles(benchmark::State& state) {
 2 25544  51.6405 309.2692 0004792  43.0163  63.5300 15.49960977447473)";
 
   for (auto _ : state) {
-    auto tle = eob::ParseTle(s);
+    auto tle = ParseTle(s);
   }
 }
 BENCHMARK(BM_ParseTles);
 
-// static void BM_JulianTimeNow(benchmark::State& state) {
-//   auto tz = date::current_zone();
-//   for (auto _ : state) {
-//     auto zt = date::make_zoned(tz, std::chrono::system_clock::now());
-//     auto lt = zt.get_local_time();
-//     auto ld = date::floor<date::days>(lt);
-//     julian::year_month_day ymd{ld};
-//     auto time = date::make_time(lt - ld);
-//   }
-// }
-// BENCHMARK(BM_JulianTimeNow);
+static void BM_CalcGMST(benchmark::State& state) {
+  auto now = std::chrono::system_clock::now();
+  for (auto _ : state) {
+    auto gmst = calc_gmst(now);
+  }
+}
+BENCHMARK(BM_CalcGMST);
 
 BENCHMARK_MAIN();

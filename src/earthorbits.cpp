@@ -8,7 +8,7 @@
 
 namespace eob {
 namespace {
-/// @brief Compute sidereal angle at 0h UTC for Greenwich
+/// @brief Compute sidereal angle at 0h UTC for Greenwich mean time
 ///
 /// θg(0h) = 24110s.54841 + 8640184s.812866 Tu + 0s.093104 Tu^2 - 6.2x10-6 Tu^3
 /// "s" above are seconds, i.e. sidereal time, not angle (radians, degrees)
@@ -67,7 +67,7 @@ namespace {
   return fmt::format("{}.{:03d}Z", ymd_hms.data(), ms);
 }
 
-[[nodiscard]] double calc_gmst(
+[[nodiscard]] eob_seconds calc_gmst(
     const std::chrono::time_point<std::chrono::system_clock> &tp) noexcept {
   auto tp_0h = std::chrono::floor<std::chrono::days>(tp);
   auto gmst_0h = calc_gmst_0h(tp_0h);
@@ -81,6 +81,6 @@ namespace {
   constexpr double earth_rotation =
       earth_rotation_rad_per_s * seconds_per_day / pi2;
 
-  return wrap_to_86400(gmst_0h + earth_rotation * delta_s.count());
+  return eob_seconds{wrap_to_86400(gmst_0h + earth_rotation * delta_s.count())};
 }
 }  // namespace eob
