@@ -1,5 +1,7 @@
 # CMake temporary directories
 build
+build-cmake-release/
+build-cmake-debug/
 
 # IDE folders
 .vscode
